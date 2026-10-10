@@ -1,0 +1,19 @@
+# Personal learning context (Devpost Learn) — kept out of commits
+/devpost/learner-profile.md
+
+# Local credentials — never commit; .env.example is the secret-free template
+.env
+.env.*
+!.env.example
+
+# Dependencies and build output
+node_modules/
+.next/
+out/
+coverage/
+.vercel/
+*.tsbuildinfo
+next-env.d.ts
+
+# OS / editor
+.DS_Store

@@ -50,6 +50,8 @@ try {
   const final = toSec(await q(`document.querySelector('.stat b').textContent`));
   const shownPen = await q(`document.querySelectorAll('.stat b')[1].textContent`);
   check(Math.abs(final - (clock + penalty)) < 2, `final time ${final}s ≈ clock ${clock.toFixed(1)}s + penalties ${penalty}s; shown ${shownPen}`);
+  const header = () => q(`document.querySelector('.header .stats').textContent`);
+  check((await header()).includes("1 streak"), `found drill bumps the streak: "${await header()}"`);
   const firstBug = await q(`document.querySelector('.reveal .hint-text').textContent`);
   console.log("first bug:", firstBug);
   await b.shot(new URL("./reveal.png", import.meta.url).pathname);
@@ -62,6 +64,12 @@ try {
   const secondBug = await q(`document.querySelector('.reveal .hint-text').textContent`);
   check(secondBug !== firstBug, `drill again plants elsewhere (${firstBug} → ${secondBug})`);
   check((await q(`document.querySelector('.reveal h2').textContent`)).startsWith("Here's what"), "give up shows the missed reveal");
+  check((await header()).includes("0 streak"), `give up resets the streak: "${await header()}"`);
+
+  await b.goto(base, 3000);
+  const after = await header();
+  check(after.includes("0 streak") && after.includes(`best ${final < 60 ? "0:" : ""}`) && !after.includes("—"), `streak and best survive a reload: "${after}"`);
+  await b.shot(new URL("./setup.png", import.meta.url).pathname);
 } finally {
   b.close();
 }

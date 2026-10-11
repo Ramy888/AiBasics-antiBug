@@ -39,7 +39,7 @@ Build mode: fast (Ramy asked to "proceed building auto"; pauses only at the hand
   Learner check: Do two drills on the same code: make one deliberate wrong click and use Hint once, then press Drill again and confirm the second bug is on a different line.
   Commit: `Add timer, penalties, hints, give up, and drill again`
 
-- [ ] **4. Streak, best time, rate limit, and the finished look**
+- [x] **4. Streak, best time, rate limit, and the finished look**
   Becomes usable: The header shows a streak and best time that survive a reload; Give up resets the streak; too many drills shows "Easy, tiger."; the page has the full dark editor look, first-visit explainer, and a README and `.env.example` someone else can run from.
   Why now: These are the polish and protection layers around a working game; none of them changes the core loop, so they come last before the final review.
   PRD ref: `prd.md > Streak and best time`, `prd.md > States and Boundaries`, `prd.md > Look and Feel`, `prd.md > Screens and Layout`
@@ -75,5 +75,7 @@ Activity mode: [live app and editor, explicit static fallback, focused alternati
 - Early checkpoint feedback (Ramy, invoiceForm.mjs): the bug (`<` → `<=`, line 37) was too hard to find in 58 lines without a hint; the reveal rendered above the code and went unseen; ligatures drew `>=` as `≥`; long lines were cut off. Fixed now: ligatures off, long lines wrap, page scrolls to the reveal, clearer line hover, and the prompt anchors each bug to something visible nearby. Difficulty is addressed further by slice 3's hot/warm/cold and Hint, and slice 2's changed-regions-only view.
 - Second checkpoint drill was also too hard (off-by-one inside a milestone-split arithmetic expression, 6 wrong guesses). The saboteur prompt now targets a ~1-minute find: single-token changes readable from the line and its neighbours, no multi-line arithmetic tracing. PRD `Planting the bug` gained a matching difficulty criterion.
 - Live runs showed Claude plants the same "best" bug every time for a given file. Each drill now gets a random category hint plus a random third of the eligible lines as a hard limit for the first two attempts (the checker enforces it; the last attempt uses the full set). Three live plants on invoiceForm.mjs then gave three different bugs.
+- Added an optional `ANTIBUG_DRILLS_PER_HOUR` setting (default 10, as specced): the in-memory limit blocked local testing and demo recording after ten drills.
+- Added a three-step "how it works" strip under the setup panel as the first-visit explainer, since the PRD asks for one and the setup panel alone left the page feeling empty.
 - The checker also requires `mutated` to keep the same number of lines as `original`, and compares comment-free transpiled output to reject type-only edits — the spec didn't fix line counts, but stable line numbers are what make click-to-guess work.
 - Live Claude verification lives in `npm run test:live` (tests/live, real API spend) and stays out of `npm test` — the spec's tests are mocked; a deliberate opt-in keeps routine runs free.

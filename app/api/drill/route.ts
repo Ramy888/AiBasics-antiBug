@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { drillCommit, drillPasted } from "@/lib/drill";
 import { errorResponse, readBody } from "@/lib/errors";
+import { clientIp, takeDrill } from "@/lib/ratelimit";
 
 export const maxDuration = 60;
 
@@ -13,6 +14,7 @@ const Body = z.union([
 export async function POST(req: Request) {
   try {
     const body = await readBody(req, Body);
+    takeDrill(clientIp(req));
     const drill = "code" in body ? drillPasted(body.code, body.filename, body.avoidLines) : drillCommit(body.repo, body.sha, body.avoidLines);
     return Response.json(await drill);
   } catch (err) {

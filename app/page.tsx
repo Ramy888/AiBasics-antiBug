@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { CodeView } from "@/components/CodeView";
 import { Header } from "@/components/Header";
 import { HuntPanel } from "@/components/HuntPanel";
@@ -9,6 +9,7 @@ import { RevealPanel, type Reveal } from "@/components/RevealPanel";
 import { SetupPanel } from "@/components/SetupPanel";
 import { post } from "@/lib/api";
 import type { DrillResponse, Temperature } from "@/lib/shared";
+import { recordFound, recordGiveUp, serverStreak, streakSnapshot, subscribeStreak } from "@/lib/streak";
 
 type Phase = "setup" | "planting" | "hunt" | "reveal";
 type Source = { repo: string; sha: string } | { code: string; filename?: string };
@@ -34,6 +35,7 @@ export default function Page() {
   const [busy, setBusy] = useState(false);
   const [reveal, setReveal] = useState<Reveal | null>(null);
   const [result, setResult] = useState<{ found: boolean; seconds: number } | null>(null);
+  const streak = useSyncExternalStore(subscribeStreak, streakSnapshot, serverStreak);
   const abort = useRef<AbortController | null>(null);
   const revealRef = useRef<HTMLDivElement | null>(null);
 
@@ -90,6 +92,8 @@ export default function Page() {
     setReveal(r);
     setUsedLines((u) => [...new Set([...u, ...r.bugLines])]);
     setResult({ found, seconds });
+    if (found) recordFound(Math.round(seconds * 10) / 10);
+    else recordGiveUp();
     setPhase("reveal");
   }
 
@@ -134,8 +138,17 @@ export default function Page() {
 
   return (
     <main className="shell">
-      <Header />
-      {phase === "setup" && <SetupPanel initial={setup} error={error} onCommit={startCommit} onPaste={startPaste} />}
+      <Header streak={streak} />
+      {phase === "setup" && (
+        <>
+          <SetupPanel initial={setup} error={error} onCommit={startCommit} onPaste={startPaste} />
+          <ol className="how">
+            <li><b>1</b> Pick a commit your agent just wrote, or paste code.</li>
+            <li><b>2</b> antiBug plants one realistic logic bug in the changed lines. It still compiles.</li>
+            <li><b>3</b> Find the line against the clock. Wrong clicks cost 10s; a hint costs 15s.</li>
+          </ol>
+        </>
+      )}
       {phase === "planting" && <PlantingProgress onCancel={() => abort.current?.abort()} />}
       {(phase === "hunt" || phase === "reveal") && drill && (
         <>

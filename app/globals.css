@@ -153,3 +153,8 @@ button, input, textarea { font: inherit; color: inherit; }
 .stat b { font-family: var(--font-code), monospace; font-size: 22px; font-weight: 600; }
 .stat span { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
 .stats-row { display: flex; gap: 32px; flex-wrap: wrap; }
+
+/* First-visit explainer */
+.how { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-top: 16px; }
+.how li { color: var(--muted); font-size: 14px; padding: 14px 16px; border: 1px solid var(--border); border-radius: var(--radius); display: flex; gap: 12px; align-items: baseline; }
+.how b { font-family: var(--font-code), monospace; color: var(--bug); }

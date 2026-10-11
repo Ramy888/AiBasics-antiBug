@@ -22,6 +22,7 @@ vi.mock("@/lib/saboteur", async (importOriginal) => {
 const { POST: drill } = await import("@/app/api/drill/route");
 const { POST: guess } = await import("@/app/api/guess/route");
 const { POST: reveal } = await import("@/app/api/reveal/route");
+const { POST: hint } = await import("@/app/api/hint/route");
 
 const code = readFileSync(path.join(__dirname, "fixtures/cart.ts"), "utf8");
 const req = (body: unknown) => new Request("http://x", { method: "POST", body: JSON.stringify(body) });
@@ -48,6 +49,20 @@ describe("drill → guess → reveal", () => {
 
     const r = await (await reveal(req({ token: d.token }))).json();
     expect(r).toMatchObject({ bugLines: [15], category: "comparison", lesson: expect.stringContaining("50") });
+  });
+
+  it("gives the category as a hint without the line", async () => {
+    const d = await (await drill(req({ code, filename: "cart.ts" }))).json();
+    const raw = await (await hint(req({ token: d.token }))).text();
+    expect(JSON.parse(raw)).toEqual({ category: "comparison" });
+    expect(raw).not.toMatch(/15|FREE_SHIPPING/);
+  });
+
+  it("refuses to plant on a line already drilled this session", async () => {
+    // The mocked Claude keeps proposing line 15; with 15 avoided, every attempt fails the checker.
+    const res = await drill(req({ code, filename: "cart.ts", avoidLines: [15] }));
+    expect(res.status).toBe(502);
+    expect((await res.json()).error.code).toBe("plant_failed");
   });
 
   it("rejects over-long pastes, bad JSON and forged tokens with clear errors", async () => {

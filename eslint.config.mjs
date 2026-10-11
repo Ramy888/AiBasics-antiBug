@@ -14,6 +14,8 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Captured third-party code used as test data.
     "tests/fixtures/**",
+    // Demo-recording driver copied from another project.
+    "scripts/demo/cdp.mjs",
     // Devpost Learn skill pack files.
     ".agents/**",
     "agent/**",

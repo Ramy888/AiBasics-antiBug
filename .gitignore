@@ -20,3 +20,6 @@ next-env.d.ts
 /build
 *.pem
 npm-debug.log*
+
+# Screenshots from local verification scripts
+/scripts/**/*.png

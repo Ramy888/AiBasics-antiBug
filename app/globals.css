@@ -139,3 +139,17 @@ button, input, textarea { font: inherit; color: inherit; }
 .commit:hover { background: var(--panel-2); border-left-color: var(--bug); }
 .commit-msg { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .commit-meta { color: var(--muted); font-size: 12px; white-space: nowrap; }
+
+/* Hunt bar: timer, prompt, actions */
+.hunt {
+  display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+  background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 12px 20px; margin-bottom: 12px; position: sticky; top: 8px; z-index: 2;
+}
+.timer { font-size: 48px; font-weight: 600; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; display: flex; align-items: baseline; gap: 8px; }
+.penalty { font-size: 14px; color: var(--bug); font-weight: 500; }
+.hunt-mid { flex: 1; min-width: 220px; display: grid; gap: 2px; }
+.stat { display: grid; gap: 2px; }
+.stat b { font-family: var(--font-code), monospace; font-size: 22px; font-weight: 600; }
+.stat span { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+.stats-row { display: flex; gap: 32px; flex-wrap: wrap; }

@@ -1,6 +1,7 @@
 "use client";
 
 import { CATEGORY_LABEL } from "@/lib/labels";
+import { formatTime } from "./Timer";
 
 export type Reveal = { bugLines: number[]; original: string; mutated: string; category: string; lesson: string };
 
@@ -19,9 +20,19 @@ function highlight(line: string, other: string) {
   );
 }
 
-type Props = { reveal: Reveal; found: boolean; wrongGuesses: number; onNew: () => void };
+type Props = {
+  reveal: Reveal;
+  found: boolean;
+  seconds: number;
+  penalty: number;
+  wrongGuesses: number;
+  usedHint: boolean;
+  error: string | null;
+  onAgain: () => void;
+  onNew: () => void;
+};
 
-export function RevealPanel({ reveal, found, wrongGuesses, onNew }: Props) {
+export function RevealPanel({ reveal, found, seconds, penalty, wrongGuesses, usedHint, error, onAgain, onNew }: Props) {
   const before = reveal.original.split("\n");
   const after = reveal.mutated.split("\n");
   const rows = before
@@ -30,12 +41,16 @@ export function RevealPanel({ reveal, found, wrongGuesses, onNew }: Props) {
 
   return (
     <section className="panel reveal">
-      <h2 className={found ? "found" : "missed"}>{found ? "Got it." : "Here's what slipped through."}</h2>
+      <h2 className={found ? "found" : "missed"}>{found ? `Got it, ${Math.round(seconds)}s.` : "Here's what would have shipped."}</h2>
+      <div className="stats-row">
+        <div className="stat"><b>{found ? formatTime(seconds) : "—"}</b><span>final time</span></div>
+        <div className="stat"><b>+{penalty}s</b><span>penalties</span></div>
+        <div className="stat"><b>{wrongGuesses}</b><span>wrong {wrongGuesses === 1 ? "guess" : "guesses"}</span></div>
+        <div className="stat"><b>{usedHint ? "yes" : "no"}</b><span>hint</span></div>
+      </div>
       <div className="row">
         <span className="chip">{CATEGORY_LABEL[reveal.category] ?? reveal.category}</span>
-        <span className="hint-text">
-          line {reveal.bugLines.join(", ")} · {wrongGuesses} wrong {wrongGuesses === 1 ? "guess" : "guesses"}
-        </span>
+        <span className="hint-text">line {reveal.bugLines.join(", ")}</span>
       </div>
       <div className="diff">
         {rows.map(({ b, a }, i) => (
@@ -47,8 +62,10 @@ export function RevealPanel({ reveal, found, wrongGuesses, onNew }: Props) {
       </div>
       <p className="lesson">{reveal.lesson}</p>
       <div className="row">
-        <button className="btn btn-primary" onClick={onNew}>New code</button>
+        <button className="btn btn-primary" onClick={onAgain}>Drill again</button>
+        <button className="btn" onClick={onNew}>New code</button>
       </div>
+      {error && <p className="error" role="alert">{error}</p>}
     </section>
   );
 }

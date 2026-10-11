@@ -29,7 +29,7 @@ Build mode: fast (Ramy asked to "proceed building auto"; pauses only at the hand
   Learner check: Paste one of your public repos (or `vercel/next.js`), pick a recent commit, and confirm the code shown is really from that commit and the planted bug sits in lines that commit added.
   Commit: `Drill a recent commit from a public GitHub repo`
 
-- [ ] **3. The hunt becomes a game: timer, penalties, hints, give up, drill again**
+- [x] **3. The hunt becomes a game: timer, penalties, hints, give up, drill again**
   Becomes usable: A running timer from the moment code appears; a wrong click shakes red, adds 10 s and shows hot/warm/cold; Hint shows the category for +15 s; Give up reveals; the reveal shows final time and wrong guesses; Drill again plants a different bug in the same code.
   Why now: The kernel works end to end; this turns it into the timed drill the PRD describes. It's pure client state plus the `hint` route and `avoidLines`, so it's low risk once slices 1–2 hold.
   PRD ref: `prd.md > The hunt`, `prd.md > The reveal`, `prd.md > The Core Journey` (steps 5–7), `prd.md > Planting the bug` (no repeat line)

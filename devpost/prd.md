@@ -1,6 +1,6 @@
 ---
 doc: prd
-status: draft
+status: approved
 ---
 
 # antiBug: Product Requirements
@@ -34,7 +34,7 @@ One page with three states that replace each other in the main panel; the header
 Works on desktop first (the demo surface). On a phone it must not break, but phone layout isn't polished.
 
 ## Look and Feel
-*Assumption, pending Ramy's confirmation:*
+*Proposed by the agent; accepted by Ramy without changes ("key added, proceed building"):*
 - A dark code-editor aesthetic: near-black background, slightly lighter panels.
 - Monospace code (JetBrains Mono) and a clean sans-serif UI font (Inter).
 - One alarm accent (red/amber) for "bug" and "wrong"; green only for "found".
@@ -96,7 +96,7 @@ Works on desktop first (the demo surface). On a phone it must not break, but pho
 - **Kernel: drill on your own fresh commit.** Ramy chose this idea after the two-model debate. It's the novelty that survived the competitor search.
 - **Input: public GitHub commit or pasted code; JS/TS only.** From the architecture sketch Ramy accepted ("ok").
 - **The answer stays on the server until reveal.** From the same sketch.
-- *Assumptions to confirm:* look and feel (above), the penalty values (+10 s wrong, +15 s hint), showing the changed regions rather than the whole file, and the hot/warm/cold thresholds.
+- **Agent-proposed, accepted by Ramy without changes:** look and feel (above), the penalty values (+10 s wrong, +15 s hint), showing the changed regions rather than the whole file, and the hot/warm/cold thresholds.
 
 ## What We're Building
 The full core journey above: GitHub commit and paste inputs, the plant-and-verify step, a timed hunt with hints, the reveal with lesson, and the streak and best time in the browser. A basic per-visitor rate limit.
@@ -116,5 +116,4 @@ A CLI or git hook that drills you after each commit. Difficulty levels. An AI "j
 - **Storing anyone's code:** fetched code is used for one drill and not kept.
 
 ## Open Questions
-- Look and feel confirmation: needed before `4-spec` is approved (affects Design).
 - The penalty values and display choices above can be changed later without affecting the spec.

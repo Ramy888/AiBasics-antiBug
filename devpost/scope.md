@@ -1,6 +1,6 @@
 ---
 doc: scope
-status: draft
+status: approved
 ---
 
 # antiBug
@@ -17,7 +17,7 @@ A developer who builds with an AI coding agent (Claude Code, Codex, Cursor) and 
 Open antiBug → paste a public GitHub repo and pick a recent commit (or paste a snippet) → a bug is planted in the changed lines → hunt with a timer running and click the line you think is broken → see the original vs. the sabotaged line, a two-line lesson, and your time. They come back because every new commit is a fresh drill, and a streak tracks how sharp their reviews are.
 
 ## Inspiration & Identity
-A code-review tool with the tension of a timed game: dark, editor-like, monospace code, one alarm-colour accent for "bug". Terse, slightly playful copy ("Sabotage planted. Find it."). *(Assumption: Ramy has not given visual direction yet. To be confirmed in the PRD.)*
+A code-review tool with the tension of a timed game: dark, editor-like, monospace code, one alarm-colour accent for "bug". Terse, slightly playful copy ("Sabotage planted. Find it."). *(Agent-proposed; Ramy accepted it without changes.)*
 Research context: Anthropic's Jan 2026 study of AI assistance and coding skills (https://www.anthropic.com/research/AI-assistance-coding-skills). It measured comprehension of a new library, not real-world debugging, so cite it with care.
 
 ## Why This Matters to the Learner

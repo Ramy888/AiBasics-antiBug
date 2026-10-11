@@ -1,6 +1,6 @@
 ---
 doc: spec
-status: draft
+status: approved
 ---
 
 # antiBug: Technical Spec
@@ -62,7 +62,7 @@ Paste mode replaces step 1, and the GitHub part of step 2, with `POST /api/drill
 - **Submission:** a demo video under 3 minutes plus a public GitHub repo with a license showing in the About section. Deployment is **optional** (Vercel, set up in `6-ship` only with Ramy's authorization, because a public URL spends his API budget).
 
 ## Look and Feel
-From `prd.md > Look and Feel` (pending confirmation):
+From `prd.md > Look and Feel` (accepted by Ramy):
 - **Colours** (CSS variables in `globals.css`):
   - background `#0d1117`, panels `#161b22`, borders `#30363d`;
   - text `#e6edf3`, muted `#8b949e`;
@@ -221,7 +221,5 @@ AiBasics-antiBug/
 - **Agent-derived details:** Next.js App Router; the TypeScript compiler as the parse checker (one tool for JS and TS, instead of acorn which is JS-only); AES-GCM token instead of storage; the penalty and threshold values; Opus 5.5 at `medium` effort.
 - **Learner uncertainty:** none identified yet. Ramy hasn't raised one, and none is invented here.
 - **Open, agent-side:** confirm that structured output + `fallbacks: "default"` work together (first slice). Judge bug subtlety at the first hands-on checkpoint; if bugs are too obvious, tighten the prompt (and only then consider the deferred "judge" pass).
-- **Open, needs Ramy:**
-  1. Confirm the look and feel.
-  2. Put `ANTHROPIC_API_KEY` in `.env` (blocks verifying the kernel).
-  3. Make the repo public before recording, since the demo drills its own commits.
+- **Resolved with Ramy:** look and feel accepted; `ANTHROPIC_API_KEY` placed in `.env`.
+- **Open, needs Ramy (6-ship):** make the repo public before recording, since the demo drills its own commits.

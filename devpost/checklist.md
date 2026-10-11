@@ -1,6 +1,6 @@
 ---
 doc: checklist
-status: draft
+status: approved
 ---
 
 # Build Checklist
@@ -9,7 +9,7 @@ Build mode: fast (Ramy asked to "proceed building auto"; pauses only at the hand
 
 ## Slices
 
-- [ ] **1. Paste code, get one planted bug, click the broken line, see the reveal**
+- [x] **1. Paste code, get one planted bug, click the broken line, see the reveal**
   Becomes usable: A running app where you paste JS/TS, press Sabotage it, see the sabotaged code with line numbers, click a line, and get right/wrong plus the original-vs-sabotaged reveal and lesson. No GitHub, timer, or streak yet.
   Why now: This is the unique kernel and the biggest risk (Claude must reliably plant a subtle bug that passes the checker, and the structured-output + fallback call shape must work). Bootstrapping the Next.js app lives here so everything later has somewhere to land.
   PRD ref: `prd.md > Pasting code`, `prd.md > Planting the bug`, `prd.md > The reveal`, `prd.md > The Core Journey` (steps 3, 5, 6)
@@ -71,3 +71,6 @@ Reflection: [offered/answered/declined/already covered — personal answer belon
 Activity mode: [live app and editor, explicit static fallback, focused alternative, prior practice, or recap]
 
 ## Revisions
+
+- The checker also requires `mutated` to keep the same number of lines as `original`, and compares comment-free transpiled output to reject type-only edits — the spec didn't fix line counts, but stable line numbers are what make click-to-guess work.
+- Live Claude verification lives in `npm run test:live` (tests/live, real API spend) and stays out of `npm test` — the spec's tests are mocked; a deliberate opt-in keeps routine runs free.

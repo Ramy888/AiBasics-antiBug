@@ -17,3 +17,6 @@ next-env.d.ts
 
 # OS / editor
 .DS_Store
+/build
+*.pem
+npm-debug.log*

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { temperature } from "@/lib/drill";
+import { temperature } from "@/lib/shared";
 import { errorResponse, readBody } from "@/lib/errors";
 import { open } from "@/lib/seal";
 

@@ -19,7 +19,7 @@ Build mode: fast (Ramy asked to "proceed building auto"; pauses only at the hand
   Learner check: Run `npm run dev`, open http://localhost:3000, paste a 30–80 line function you wrote recently, press Sabotage it, hunt for the bug, and say whether it felt subtle enough to be worth finding.
   Commit: `Plant and reveal one bug in pasted code`
 
-- [ ] **2. Drill a recent commit from a public GitHub repo**
+- [x] **2. Drill a recent commit from a public GitHub repo**
   Becomes usable: Enter `owner/repo` or a GitHub URL, see the 10 latest commits, pick one, and drill the JS/TS file with the most added lines, shown as changed regions with 3 lines of context and real line numbers.
   Why now: This is the "your own fresh commit" half of the kernel and depends on slice 1's plant/check/seal pipeline. GitHub's API shape and the patch parsing are the next risk.
   PRD ref: `prd.md > Loading code from GitHub`, `prd.md > States and Boundaries`, `prd.md > The Core Journey` (steps 2, 4)

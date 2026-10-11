@@ -1,6 +1,6 @@
 "use client";
 
-import type { Region } from "@/lib/drill";
+import type { Region } from "@/lib/shared";
 
 type Props = {
   regions: Region[];

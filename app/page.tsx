@@ -7,14 +7,14 @@ import { PlantingProgress } from "@/components/PlantingProgress";
 import { RevealPanel, type Reveal } from "@/components/RevealPanel";
 import { SetupPanel } from "@/components/SetupPanel";
 import { post } from "@/lib/api";
-import type { DrillResponse } from "@/lib/drill";
+import type { DrillResponse } from "@/lib/shared";
 
 type Phase = "setup" | "planting" | "hunt" | "reveal";
 
 export default function Page() {
   const [phase, setPhase] = useState<Phase>("setup");
   const [error, setError] = useState<string | null>(null);
-  const [pasted, setPasted] = useState("");
+  const [setup, setSetup] = useState<{ tab: "github" | "paste"; repo: string; code: string }>({ tab: "github", repo: "", code: "" });
   const [drill, setDrill] = useState<DrillResponse | null>(null);
   const [wrong, setWrong] = useState<number[]>([]);
   const [lastWrong, setLastWrong] = useState<number | null>(null);
@@ -29,14 +29,13 @@ export default function Page() {
     if (phase === "reveal") revealRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [phase]);
 
-  async function startPaste(code: string, filename: string) {
-    setPasted(code);
+  async function startDrill(body: object) {
     setError(null);
     setPhase("planting");
     abort.current = new AbortController();
     const timeout = setTimeout(() => abort.current?.abort("timeout"), 60_000);
     try {
-      const d = await post<DrillResponse>("/api/drill", { code, filename: filename || undefined }, abort.current.signal);
+      const d = await post<DrillResponse>("/api/drill", body, abort.current.signal);
       setDrill(d);
       setWrong([]);
       setLastWrong(null);
@@ -45,11 +44,21 @@ export default function Page() {
     } catch (e) {
       const timedOut = abort.current?.signal.reason === "timeout";
       const cancelled = abort.current?.signal.aborted && !timedOut;
-      setError(cancelled ? null : timedOut ? "Planting took too long. Try again or paste less code." : (e as Error).message);
+      setError(cancelled ? null : timedOut ? "Planting took too long. Try again, or pick a smaller change." : (e as Error).message);
       setPhase("setup");
     } finally {
       clearTimeout(timeout);
     }
+  }
+
+  function startCommit(repo: string, sha: string) {
+    setSetup({ tab: "github", repo, code: "" });
+    startDrill({ repo, sha });
+  }
+
+  function startPaste(code: string, filename: string) {
+    setSetup({ tab: "paste", repo: "", code });
+    startDrill({ code, filename: filename || undefined });
   }
 
   async function guess(line: number) {
@@ -82,7 +91,7 @@ export default function Page() {
   return (
     <main className="shell">
       <Header />
-      {phase === "setup" && <SetupPanel initialCode={pasted} error={error} onPaste={startPaste} />}
+      {phase === "setup" && <SetupPanel initial={setup} error={error} onCommit={startCommit} onPaste={startPaste} />}
       {phase === "planting" && <PlantingProgress onCancel={() => abort.current?.abort()} />}
       {(phase === "hunt" || phase === "reveal") && drill && (
         <>
@@ -94,6 +103,7 @@ export default function Page() {
           <div className="huntbar">
             <span className="filepath">
               <strong>{drill.file}</strong>
+              {drill.commit && ` @ ${drill.commit.sha.slice(0, 7)} · ${drill.commit.message}`}
             </span>
             {phase === "hunt" && <span className="callout">Sabotage planted. Find it.</span>}
             <span className="feedback">{phase === "hunt" && lastWrong !== null ? `Not line ${lastWrong}.` : ""}</span>

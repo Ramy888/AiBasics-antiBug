@@ -12,6 +12,12 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Captured third-party code used as test data.
+    "tests/fixtures/**",
+    // Devpost Learn skill pack files.
+    ".agents/**",
+    "agent/**",
+    ".claude/**",
   ]),
 ]);
 

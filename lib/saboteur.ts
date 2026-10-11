@@ -22,7 +22,7 @@ Rules for the bug:
 - The code must still parse. Keep indentation and formatting identical to the original; do not add or remove lines.
 - It must change runtime behaviour. Never change only whitespace, comments, strings shown to users, or type annotations.
 - Make it the kind of mistake that slips through code review: an off-by-one, a flipped or loosened comparison, inverted boolean logic, swapped arguments, a missing await, a wrong default, the wrong (similarly named) variable, or wrong arithmetic.
-- Make it subtle but fair: a careful reader of this file can spot it without running the code. Prefer lines that carry real logic over boilerplate, imports or logging.
+- Make it subtle but fair: a careful reader of this file can spot it without running the code, because the bug contradicts something visible nearby: a comment, an error message, a function or variable name, or a sibling line that does it correctly. Prefer lines that carry real logic over boilerplate, imports or logging.
 - Never add comments, TODOs or anything that hints at the change.
 
 Output fields:

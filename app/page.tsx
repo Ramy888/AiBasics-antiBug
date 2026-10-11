@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CodeView } from "@/components/CodeView";
 import { Header } from "@/components/Header";
 import { PlantingProgress } from "@/components/PlantingProgress";
@@ -22,6 +22,12 @@ export default function Page() {
   const [reveal, setReveal] = useState<Reveal | null>(null);
   const [found, setFound] = useState(false);
   const abort = useRef<AbortController | null>(null);
+  const revealRef = useRef<HTMLDivElement | null>(null);
+
+  // The reveal renders above the code, often off-screen when the bug is far down the file.
+  useEffect(() => {
+    if (phase === "reveal") revealRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [phase]);
 
   async function startPaste(code: string, filename: string) {
     setPasted(code);
@@ -81,7 +87,7 @@ export default function Page() {
       {(phase === "hunt" || phase === "reveal") && drill && (
         <>
           {phase === "reveal" && reveal && (
-            <div style={{ marginBottom: 16 }}>
+            <div ref={revealRef} style={{ marginBottom: 16, scrollMarginTop: 16 }}>
               <RevealPanel reveal={reveal} found={found} wrongGuesses={wrong.length} onNew={newCode} />
             </div>
           )}

@@ -30,6 +30,9 @@ button, input, textarea { font: inherit; color: inherit; }
 
 .mono { font-family: var(--font-code), ui-monospace, monospace; }
 
+/* Ligatures would draw >= as ≥ and merge !== — exactly the operators a planted bug flips. */
+.mono, .code, .diff, .textarea { font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }
+
 .shell { max-width: 1120px; margin: 0 auto; padding: 0 16px 48px; }
 
 /* Header */
@@ -95,11 +98,11 @@ button, input, textarea { font: inherit; color: inherit; }
 .gap { color: var(--muted); font-size: 12px; padding: 2px 12px; background: var(--bg); }
 .line {
   display: grid; grid-template-columns: 56px 1fr; width: 100%; text-align: left;
-  background: none; border: 0; cursor: pointer; white-space: pre; border-left: 3px solid transparent;
+  background: none; border: 0; cursor: pointer; border-left: 3px solid transparent;
 }
-.line:hover { background: var(--panel-2); }
+.line:not(:disabled):hover { background: var(--panel-2); border-left-color: var(--muted); }
 .line .num { color: var(--muted); text-align: right; padding-right: 16px; user-select: none; }
-.line .txt { padding-right: 16px; }
+.line .txt { padding-right: 16px; white-space: pre-wrap; overflow-wrap: anywhere; }
 .line.wrong { background: var(--bug-bg); border-left-color: var(--bug); animation: shake 0.3s; }
 .line.found { background: var(--found-bg); border-left-color: var(--found); animation: pulse 0.6s 2; }
 .line:disabled { cursor: default; }

@@ -72,5 +72,6 @@ Activity mode: [live app and editor, explicit static fallback, focused alternati
 
 ## Revisions
 
+- Early checkpoint feedback (Ramy, invoiceForm.mjs): the bug (`<` → `<=`, line 37) was too hard to find in 58 lines without a hint; the reveal rendered above the code and went unseen; ligatures drew `>=` as `≥`; long lines were cut off. Fixed now: ligatures off, long lines wrap, page scrolls to the reveal, clearer line hover, and the prompt anchors each bug to something visible nearby. Difficulty is addressed further by slice 3's hot/warm/cold and Hint, and slice 2's changed-regions-only view.
 - The checker also requires `mutated` to keep the same number of lines as `original`, and compares comment-free transpiled output to reject type-only edits — the spec didn't fix line counts, but stable line numbers are what make click-to-guess work.
 - Live Claude verification lives in `npm run test:live` (tests/live, real API spend) and stays out of `npm test` — the spec's tests are mocked; a deliberate opt-in keeps routine runs free.

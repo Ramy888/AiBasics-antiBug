@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
-import { buildPrompt, plantBug, type AskFn } from "@/lib/saboteur";
+import { buildPrompt, pickNudge, plantBug, type AskFn } from "@/lib/saboteur";
 
 const content = readFileSync(path.join(__dirname, "fixtures/cart.ts"), "utf8");
 const input = {
@@ -37,6 +37,22 @@ describe("plantBug", () => {
     const ask = vi.fn<AskFn>().mockResolvedValue({ reason: "nope" });
     await expect(plantBug(input, ask)).rejects.toThrow(/Couldn't plant/);
     expect(ask).toHaveBeenCalledTimes(3);
+  });
+
+  it("limits early attempts to a random third of long files, then frees the last attempt", async () => {
+    const long = Array.from({ length: 60 }, (_, i) => `export const v${i} = ${i} > 1;`).join("\n");
+    const longInput = { filename: "long.ts", content: long, eligibleLines: new Set(long.split("\n").map((_, i) => i + 1)), avoidLines: new Set<number>() };
+    const ask = vi.fn<AskFn>().mockResolvedValue({ reason: "nope" });
+    await expect(plantBug(longInput, ask, () => 0.999)).rejects.toThrow();
+    expect(ask.mock.calls[0][0]).toContain("ELIGIBLE lines: 41-60");
+    expect(ask.mock.calls[1][0]).toContain("ELIGIBLE lines: 41-60");
+    expect(ask.mock.calls[2][0]).toContain("ELIGIBLE lines: 1-60");
+    expect(ask.mock.calls[0][0]).toContain("plant a missing_await bug");
+  });
+
+  it("keeps short files whole and skips avoided lines", () => {
+    const short = { ...input, eligibleLines: new Set(Array.from({ length: 20 }, (_, i) => i + 1)) };
+    expect([...pickNudge(short, () => 0.5).focus]).toEqual([...short.eligibleLines].filter((n) => n !== 19));
   });
 
   it("numbers the file and lists eligible and avoided lines as ranges", () => {

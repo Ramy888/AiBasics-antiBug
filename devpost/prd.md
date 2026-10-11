@@ -61,6 +61,7 @@ Works on desktop first (the demo surface). On a phone it must not break, but pho
   - [ ] The sabotaged code still parses as valid JS/TS.
   - [ ] It changes behaviour, not formatting or comments. Examples: an off-by-one, a flipped comparison, a wrong boolean, swapped arguments, a missing `await`, a wrong default.
   - [ ] Only 1–3 lines differ from the original.
+  - [ ] Default difficulty: a careful reader can find it in about a minute: usually a single-token change whose effect is clear from that line and its neighbours. *(Tuned after Ramy found the first two bugs too hard.)*
   - [ ] *Drill again* never repeats the previous bug's line in the same session.
 
 ### The hunt

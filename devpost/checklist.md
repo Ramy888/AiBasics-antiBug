@@ -51,7 +51,7 @@ Build mode: fast (Ramy asked to "proceed building auto"; pauses only at the hand
 
 ## Hands-on Checkpoints
 
-- [ ] Early usable behavior explored — after slice 1: Ramy pastes his own code and judges whether the planted bugs are subtle enough (this can still reshape the prompt before GitHub mode is built)
+- [x] Early usable behavior explored — after slice 1: Ramy pastes his own code and judges whether the planted bugs are subtle enough (this can still reshape the prompt before GitHub mode is built)
 - [ ] Final kick-the-tires exploration and feedback completed
 
 ## Final Review
@@ -73,5 +73,7 @@ Activity mode: [live app and editor, explicit static fallback, focused alternati
 ## Revisions
 
 - Early checkpoint feedback (Ramy, invoiceForm.mjs): the bug (`<` → `<=`, line 37) was too hard to find in 58 lines without a hint; the reveal rendered above the code and went unseen; ligatures drew `>=` as `≥`; long lines were cut off. Fixed now: ligatures off, long lines wrap, page scrolls to the reveal, clearer line hover, and the prompt anchors each bug to something visible nearby. Difficulty is addressed further by slice 3's hot/warm/cold and Hint, and slice 2's changed-regions-only view.
+- Second checkpoint drill was also too hard (off-by-one inside a milestone-split arithmetic expression, 6 wrong guesses). The saboteur prompt now targets a ~1-minute find: single-token changes readable from the line and its neighbours, no multi-line arithmetic tracing. PRD `Planting the bug` gained a matching difficulty criterion.
+- Live runs showed Claude plants the same "best" bug every time for a given file. Each drill now gets a random category hint plus a random third of the eligible lines as a hard limit for the first two attempts (the checker enforces it; the last attempt uses the full set). Three live plants on invoiceForm.mjs then gave three different bugs.
 - The checker also requires `mutated` to keep the same number of lines as `original`, and compares comment-free transpiled output to reject type-only edits — the spec didn't fix line counts, but stable line numbers are what make click-to-guess work.
 - Live Claude verification lives in `npm run test:live` (tests/live, real API spend) and stays out of `npm test` — the spec's tests are mocked; a deliberate opt-in keeps routine runs free.

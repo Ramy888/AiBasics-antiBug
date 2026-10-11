@@ -22,6 +22,7 @@ Rules for the bug:
 - The code must still parse. Keep indentation and formatting identical to the original; do not add or remove lines.
 - It must change runtime behaviour. Never change only whitespace, comments, strings shown to users, or type annotations.
 - Make it the kind of mistake that slips through code review: an off-by-one, a flipped or loosened comparison, inverted boolean logic, swapped arguments, a missing await, a wrong default, the wrong (similarly named) variable, or wrong arithmetic.
+- Difficulty: a careful reader should find it in about a minute. Prefer a single-token change (an operator, a boolean, a literal, a variable name, an argument order) on a line whose meaning is clear from that line and its neighbours. Avoid bugs that only show after tracing arithmetic or state across many lines.
 - Make it subtle but fair: a careful reader of this file can spot it without running the code, because the bug contradicts something visible nearby: a comment, an error message, a function or variable name, or a sibling line that does it correctly. Prefer lines that carry real logic over boilerplate, imports or logging.
 - Never add comments, TODOs or anything that hints at the change.
 
@@ -45,12 +46,32 @@ function ranges(lines: Iterable<number>): string {
   return out.join(", ") || "none";
 }
 
-export function buildPrompt(input: CheckInput, feedback: string[]): string {
+// Without a nudge Claude picks the same "best" bug for the same file every time.
+const VARIETY = ["comparison", "boolean_logic", "off_by_one", "wrong_variable", "argument_order", "wrong_default", "arithmetic", "missing_await"];
+
+export type Nudge = { category: string; focus: Set<number> };
+
+/**
+ * Pick a random category (a soft hint) and a random third of the eligible lines (a hard limit the
+ * checker enforces). Claude ignores soft line hints and returns the same "best" bug every time.
+ */
+export function pickNudge(input: CheckInput, random = Math.random): Nudge {
+  const category = VARIETY[Math.floor(random() * VARIETY.length)];
+  const lines = [...input.eligibleLines].filter((n) => !input.avoidLines.has(n)).sort((a, b) => a - b);
+  const size = lines.length <= 24 ? lines.length : Math.max(12, Math.ceil(lines.length / 3));
+  const start = Math.floor(random() * (lines.length - size + 1));
+  return { category, focus: new Set(lines.slice(start, start + size)) };
+}
+
+export function buildPrompt(input: CheckInput, feedback: string[], nudge?: Nudge): string {
   const numbered = input.content
     .split("\n")
     .map((text, i) => `${String(i + 1).padStart(4)}| ${text}`)
     .join("\n");
   let prompt = `FILE: ${input.filename}\nELIGIBLE lines: ${ranges(input.eligibleLines)}\nAVOID lines: ${ranges(input.avoidLines)}\n\n<file>\n${numbered}\n</file>`;
+  if (nudge) {
+    prompt += `\n\nFor variety, plant a ${nudge.category} bug if the eligible lines offer a natural spot for one; otherwise choose whatever fits best.`;
+  }
   if (feedback.length) {
     prompt += `\n\nYour previous attempts were rejected by the automatic checker:\n${feedback.map((f) => `- ${f}`).join("\n")}\nPlant a bug that passes every rule.`;
   }
@@ -91,15 +112,18 @@ export const askClaude: AskFn = async (prompt) => {
   return { mutation: response.parsed_output };
 };
 
-export async function plantBug(input: CheckInput, ask: AskFn = askClaude): Promise<PlantResult> {
+export async function plantBug(input: CheckInput, ask: AskFn = askClaude, random = Math.random): Promise<PlantResult> {
   const feedback: string[] = [];
+  const nudge = pickNudge(input, random);
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-    const answer = await ask(buildPrompt(input, feedback));
+    // The last attempt drops the random focus, in case that slice of the file had no good spot.
+    const scoped = attempt < MAX_ATTEMPTS - 1 ? { ...input, eligibleLines: nudge.focus } : input;
+    const answer = await ask(buildPrompt(scoped, feedback, nudge));
     if ("reason" in answer) {
       feedback.push(answer.reason);
       continue;
     }
-    const check = checkMutation(input, answer.mutation);
+    const check = checkMutation(scoped, answer.mutation);
     if (check.ok) return { mutation: answer.mutation, ...check };
     feedback.push(`Line ${answer.mutation.line}: ${check.reason}`);
   }

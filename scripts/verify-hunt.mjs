@@ -50,7 +50,8 @@ try {
   const final = toSec(await q(`document.querySelector('.stat b').textContent`));
   const shownPen = await q(`document.querySelectorAll('.stat b')[1].textContent`);
   check(Math.abs(final - (clock + penalty)) < 2, `final time ${final}s ≈ clock ${clock.toFixed(1)}s + penalties ${penalty}s; shown ${shownPen}`);
-  const header = () => q(`document.querySelector('.header .stats').textContent`);
+  // The sidebar's record, as "N streak, best M:SS.S" (or "best —").
+  const header = () => q(`(() => { const s = document.querySelector('.sidebar .stats').dataset; const b = s.best === "" ? "—" : (() => { const v = Number(s.best); return Math.floor(v / 60) + ":" + (v % 60).toFixed(1).padStart(4, "0"); })(); return s.streak + " streak, best " + b; })()`);
   check((await header()).includes("1 streak"), `found drill bumps the streak: "${await header()}"`);
   const firstBug = await q(`document.querySelector('.reveal .hint-text').textContent`);
   console.log("first bug:", firstBug);

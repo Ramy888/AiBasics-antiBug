@@ -9,12 +9,12 @@ A timed debugging drill for developers who build with AI agents: antiBug plants 
 Source: `scope.md > The Unique Kernel`, `scope.md > The Core Loop`.
 
 ## The Core Journey
-1. **Arrive.** The page explains the idea in one sentence and shows two ways in: *From GitHub* (default) and *Paste code*. The streak and best time are shown in the header (empty on first visit).
+1. **Arrive.** The page explains the idea in one sentence and shows two ways in: *From GitHub* (default) and *Paste code*. The streak, best time and recent drills are shown in the sidebar (empty on first visit).
 2. **Choose code.**
    - *From GitHub:* paste a public repo URL (`https://github.com/owner/repo` or `owner/repo`) and press **Load commits**. The 10 most recent commits on the default branch appear (message, short hash, age). Pick one.
    - *Paste code:* paste up to 300 lines of JS/TS and press **Sabotage it**.
 3. **Plant.** A progress state shows "Reading your change…" → "Planting one bug…" → "Checking it still compiles…". antiBug picks the JS/TS file in that commit with the most added lines (source files before test files), and plants one logic bug inside the added lines. Typically takes 5–20 s.
-4. **Hunt.** The changed code is shown with line numbers: the commit's changed regions with 3 lines of context, or the whole pasted snippet. One line is now broken. A timer runs. The header says which file and commit this is.
+4. **Hunt.** The changed code is shown with line numbers: the commit's changed regions with 3 lines of context, or the whole pasted snippet. One line is now broken. A timer runs. The code panel and top bar say which file and commit this is.
 5. **Guess.** Click the line you think is broken.
    - Wrong: the line shakes red, +10 s penalty, and a temperature hint appears (*hot* within 3 lines, *warm* within 10, otherwise *cold*).
    - Right: go to reveal.
@@ -25,13 +25,14 @@ Source: `scope.md > The Unique Kernel`, `scope.md > The Core Loop`.
 Success: the user found the bug, and saw exactly what they would have shipped.
 
 ## Screens and Layout
-One page with three states that replace each other in the main panel; the header stays put.
-- **Header:** the antiBug wordmark, streak 🔥 N, and best time.
-- **Setup state:** tabs for *From GitHub* / *Paste code*, the input, then the commit list or textarea.
-- **Hunt state:** the file path and commit, a large timer, Hint and Give up buttons, and the code panel (full width, line numbers, clickable lines).
-- **Reveal state:** a before/after line pair, the lesson, a stats row, and the Drill again / New code buttons.
+One page laid out like a developer tool: a sidebar, a top bar, a centre column for the work, and a right-hand panel for the live controls. The states replace each other in the centre column and the right-hand panel; the sidebar stays put. *(Redesigned at the final review: Ramy picked the "pro dev tool" direction.)*
+- **Sidebar:** the antiBug wordmark, streak and best-time tiles, and the recent drills list.
+- **Top bar:** where you are (*Drills / New drill*, or the drilled file) and a status pill: Ready, Planting, Hunting, Found or Missed.
+- **Setup state:** the one-line pitch, then tabs for *From GitHub* / *Paste code*, the input, and the commit list or textarea. The right-hand panel explains the three steps.
+- **Hunt state:** the code panel (file path and commit on top, line numbers, clickable lines). The right-hand panel holds the large timer, hot/warm/cold feedback, wrong-click count, Hint and Give up.
+- **Reveal state:** the before/after line pair and the lesson above the code. The right-hand panel holds the outcome, the stats and the Drill again / New code buttons.
 
-Works on desktop first (the demo surface). On a phone it must not break, but phone layout isn't polished.
+Works on desktop first (the demo surface). On a phone the sidebar becomes a top strip (wordmark, streak, best), the right-hand panel sits above the code, and only the hunt's timer panel stays pinned while you scroll.
 
 ## Look and Feel
 *Proposed by the agent; accepted by Ramy without changes ("key added, proceed building"):*
@@ -82,6 +83,11 @@ Works on desktop first (the demo surface). On a phone it must not break, but pho
 - [ ] The best time is the fastest found drill.
 - [ ] Both survive a page reload in the same browser.
 
+### Recent drills
+- As a returning user, I want to see my last few drills so that I can tell whether I'm getting sharper.
+  - [ ] The sidebar lists the last 8 drills, newest first: the file name and the final time, or "missed" for a give-up.
+  - [ ] The list survives a page reload in the same browser, and the page still works when storage is blocked.
+
 ## States and Boundaries
 - **First visit:** streak 0, best time "—", and a one-line explainer.
 - **Repo not found or private:** "Can't see that repo. Is it public?" Stay on setup.
@@ -90,7 +96,7 @@ Works on desktop first (the demo surface). On a phone it must not break, but pho
 - **Planting fails** (no convincing bug after retries): "Couldn't plant a convincing bug in this change. Try another commit." Nothing is charged to the streak.
 - **Large files:** only the changed regions are shown and drilled. Files over 2,000 lines are skipped.
 - **Too many drills too fast:** "Easy, tiger. Try again in a few minutes." (This protects the public demo's API budget.)
-- **Persistence:** only the streak and best time (in the browser). Nothing about the code is stored.
+- **Persistence:** only the streak, best time and recent drills list (in the browser; file names and times, never code).
 
 ## Product Decisions
 - **Name: antiBug.** Ramy's choice.

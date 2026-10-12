@@ -139,17 +139,24 @@ PRD ref: `prd.md > The Core Journey`.
 
 ### Drill Page
 `app/page.tsx` (client component). A state machine `setup → planting → hunt → reveal` that owns the timer, penalties, wrong guesses and session `avoidLines`. Subcomponents live in `components/`:
-- `Header` (streak and best time);
+- `Sidebar` (wordmark, streak and best-time tiles, recent drills);
+- `HowItWorks` (the three steps, in the right-hand panel during setup and planting);
 - `SetupPanel` (tabs, repo input, commit list, paste area);
 - `PlantingProgress` (three-step message, since the progress is simulated client-side while the request runs);
-- `HuntPanel` with `CodeView` (gutter, clickable lines, shake/pulse) and `Timer`;
-- `RevealPanel` (before/after, lesson, stats, actions).
+- `HuntPanel` (right-hand panel: `Timer`, feedback, wrong clicks, Hint, Give up) beside `CodeView` (gutter, clickable lines, shake/pulse);
+- `RevealPanel`: `RevealDiff` (before/after and lesson, centre) and `ResultCard` (outcome, stats, actions, right-hand panel).
+
+Layout: a CSS grid shell (`sidebar | main`), with `main` split into a centre column and a 300 px sticky right-hand panel. Below 900 px the sidebar becomes a top strip and the panel stacks above the code; only the hunt panel stays pinned.
 
 PRD ref: `prd.md > Screens and Layout`, `prd.md > The hunt`, `prd.md > The reveal`.
 
 ### Streak Store
 `lib/streak.ts`. Reads and writes `{streak, best}` in `localStorage` under `antibug:v1`, wrapped in try/catch so the page works with storage blocked. Found → streak + 1 and update best. Give up → streak 0.
 PRD ref: `prd.md > Streak and best time`.
+
+### History Store
+`lib/history.ts`. The last 8 drills as `{file, seconds, found, at}` in `localStorage` under `antibug:history:v1`, newest first, with the same try/catch guards and `useSyncExternalStore` plumbing as the Streak Store. Kept apart so the streak's stored shape doesn't change.
+PRD ref: `prd.md > Recent drills`.
 
 ## Data Model
 - **Drill answer:** lives only inside the sealed token, which the browser holds in memory for the current drill. It's gone on reload, by design.
@@ -171,7 +178,8 @@ AiBasics-antiBug/
 │       ├── hint/route.ts     # reveal category
 │       └── reveal/route.ts   # full answer + lesson
 ├── components/
-│   ├── Header.tsx
+│   ├── Sidebar.tsx
+│   ├── HowItWorks.tsx
 │   ├── SetupPanel.tsx
 │   ├── PlantingProgress.tsx
 │   ├── HuntPanel.tsx
@@ -186,6 +194,7 @@ AiBasics-antiBug/
 │   ├── seal.ts               # Answer Seal
 │   ├── ratelimit.ts          # Rate Limiter
 │   ├── streak.ts             # Streak Store (browser)
+│   ├── history.ts            # History Store (browser)
 │   └── errors.ts             # shared error codes/messages
 ├── tests/                    # vitest: target, validate, seal, routes (Claude mocked)
 ├── devpost/                  # Devpost Learn planning docs

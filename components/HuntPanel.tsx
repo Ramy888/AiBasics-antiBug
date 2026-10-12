@@ -15,34 +15,51 @@ type Props = {
   penalty: number;
   temperature: Temperature | null;
   lastWrong: number | null;
+  wrongGuesses: number;
   hint: string | null;
   busy: boolean;
   onHint: () => void;
   onGiveUp: () => void;
 };
 
-export function HuntPanel({ startedAt, penalty, temperature, lastWrong, hint, busy, onHint, onGiveUp }: Props) {
+export function HuntPanel({ startedAt, penalty, temperature, lastWrong, wrongGuesses, hint, busy, onHint, onGiveUp }: Props) {
   return (
-    <div className="hunt">
-      <Timer startedAt={startedAt} stoppedAt={null} penalty={penalty} />
-      <div className="hunt-mid">
-        <div className="callout">Sabotage planted. Find it.</div>
-        <div className={`feedback ${temperature ?? ""}`} aria-live="polite">
-          {temperature && lastWrong !== null ? `Not line ${lastWrong}. ${FEEDBACK[temperature]}` : "Click the line you think is broken. Wrong clicks cost 10s."}
-        </div>
+    <section className="card hunt" aria-label="Drill in progress">
+      <div className="hunt-clock">
+        <span className="card-title">Time</span>
+        <Timer startedAt={startedAt} stoppedAt={null} penalty={penalty} />
       </div>
-      <div className="row">
-        {hint ? (
-          <span className="chip">{CATEGORY_LABEL[hint] ?? hint}</span>
+      <div className={`feedback ${temperature ?? ""}`} aria-live="polite">
+        {temperature && lastWrong !== null ? (
+          <>
+            <strong>Not line {lastWrong}.</strong> {FEEDBACK[temperature]}
+          </>
         ) : (
+          <>
+            <strong>Sabotage planted. Find it.</strong> Click the line you think is broken.
+          </>
+        )}
+      </div>
+      <dl className="hunt-meta">
+        <div>
+          <dt>Wrong clicks</dt>
+          <dd className="mono">{wrongGuesses}</dd>
+        </div>
+        <div>
+          <dt>Hint</dt>
+          <dd>{hint ? <span className="chip">{CATEGORY_LABEL[hint] ?? hint}</span> : <span className="muted">not used</span>}</dd>
+        </div>
+      </dl>
+      <div className="hunt-actions">
+        {!hint && (
           <button className="btn" onClick={onHint} disabled={busy}>
-            Hint <span className="hint-text">+15s</span>
+            Hint <span className="btn-cost">+15s</span>
           </button>
         )}
-        <button className="btn" onClick={onGiveUp} disabled={busy}>
+        <button className="btn btn-quiet" onClick={onGiveUp} disabled={busy}>
           Give up
         </button>
       </div>
-    </div>
+    </section>
   );
 }

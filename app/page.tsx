@@ -2,13 +2,15 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { CodeView } from "@/components/CodeView";
-import { Header } from "@/components/Header";
+import { HowItWorks } from "@/components/HowItWorks";
 import { HuntPanel } from "@/components/HuntPanel";
 import { PlantingProgress } from "@/components/PlantingProgress";
-import { RevealPanel, type Reveal } from "@/components/RevealPanel";
+import { ResultCard, RevealDiff, type Reveal } from "@/components/RevealPanel";
 import { SetupPanel, type Commit } from "@/components/SetupPanel";
+import { Sidebar } from "@/components/Sidebar";
 import { post } from "@/lib/api";
 import type { DrillResponse, Temperature } from "@/lib/shared";
+import { historySnapshot, recordDrill, serverHistory, subscribeHistory } from "@/lib/history";
 import { recordFound, recordGiveUp, serverStreak, streakSnapshot, subscribeStreak } from "@/lib/streak";
 
 type Phase = "setup" | "planting" | "hunt" | "reveal";
@@ -42,10 +44,11 @@ export default function Page() {
   const [reveal, setReveal] = useState<Reveal | null>(null);
   const [result, setResult] = useState<{ found: boolean; seconds: number } | null>(null);
   const streak = useSyncExternalStore(subscribeStreak, streakSnapshot, serverStreak);
+  const history = useSyncExternalStore(subscribeHistory, historySnapshot, serverHistory);
   const abort = useRef<AbortController | null>(null);
   const revealRef = useRef<HTMLDivElement | null>(null);
 
-  // The reveal renders above the code, often off-screen when the bug is far down the file.
+  // The reveal renders above the code, often off-screen after clicking far down the file.
   useEffect(() => {
     if (phase === "reveal") revealRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [phase]);
@@ -98,8 +101,10 @@ export default function Page() {
     setReveal(r);
     setUsedLines((u) => [...new Set([...u, ...r.bugLines])]);
     setResult({ found, seconds });
-    if (found) recordFound(Math.round(seconds * 10) / 10);
+    const rounded = Math.round(seconds * 10) / 10;
+    if (found) recordFound(rounded);
     else recordGiveUp();
+    recordDrill({ file: drill.file, seconds: found ? rounded : null, found, at: Date.now() });
     setPhase("reveal");
   }
 
@@ -142,32 +147,88 @@ export default function Page() {
     setPhase("setup");
   }
 
+  const status =
+    phase === "setup" ? "Ready" : phase === "planting" ? "Planting" : phase === "hunt" ? "Hunting" : result?.found ? "Found" : "Missed";
+
   return (
-    <main className="shell">
-      <Header streak={streak} />
-      {phase === "setup" && (
-        <>
-          <SetupPanel
-            initial={setup}
-            error={error}
-            onCommitsLoaded={(repo, commits) => setSetup((s) => ({ ...s, repo, commits }))}
-            onCommit={startCommit}
-            onPaste={startPaste}
-          />
-          <ol className="how">
-            <li><b>1</b> Pick a commit your agent just wrote, or paste code.</li>
-            <li><b>2</b> antiBug plants one realistic logic bug in the changed lines. It still compiles.</li>
-            <li><b>3</b> Find the line against the clock. Wrong clicks cost 10s; a hint costs 15s.</li>
-          </ol>
-        </>
-      )}
-      {phase === "planting" && <PlantingProgress onCancel={() => abort.current?.abort()} />}
-      {(phase === "hunt" || phase === "reveal") && drill && (
-        <>
-          {phase === "reveal" && reveal && result && (
-            <div ref={revealRef} style={{ marginBottom: 16, scrollMarginTop: 16 }}>
-              <RevealPanel
-                reveal={reveal}
+    <div className="app">
+      <Sidebar streak={streak} history={history} />
+      <main className="main">
+        <div className="topbar">
+          <nav className="crumbs" aria-label="Where you are">
+            <span className="muted">Drills</span>
+            <span className="muted" aria-hidden="true">/</span>
+            {drill && phase !== "setup" && phase !== "planting" ? (
+              <span className="mono crumb-file">{drill.file}</span>
+            ) : (
+              <span>New drill</span>
+            )}
+          </nav>
+          <span className={`status status-${status.toLowerCase()}`}>{status}</span>
+        </div>
+
+        {/* Scrolled to on reveal: the result sits at the top of the work area in both layouts. */}
+        <div className="work scroll-target" ref={revealRef}>
+          <div className="center">
+            {phase === "setup" && (
+              <>
+                <header className="intro">
+                  <h1 className="page-title">Your agent wrote it. Did you read it?</h1>
+                  <p className="muted">antiBug plants one subtle logic bug in code you just shipped. Find the line before the clock runs away.</p>
+                </header>
+                <SetupPanel
+                  initial={setup}
+                  error={error}
+                  onCommitsLoaded={(repo, commits) => setSetup((s) => ({ ...s, repo, commits }))}
+                  onCommit={startCommit}
+                  onPaste={startPaste}
+                />
+              </>
+            )}
+            {phase === "planting" && <PlantingProgress onCancel={() => abort.current?.abort()} />}
+            {(phase === "hunt" || phase === "reveal") && drill && (
+              <>
+                {phase === "reveal" && reveal && <RevealDiff reveal={reveal} />}
+                <section className="card code-card">
+                  <div className="code-head">
+                    <span className="mono code-path">{drill.file}</span>
+                    {drill.commit && (
+                      <span className="code-commit">
+                        <span className="mono">{drill.commit.sha.slice(0, 7)}</span> {drill.commit.message}
+                      </span>
+                    )}
+                  </div>
+                  <CodeView
+                    regions={drill.regions}
+                    wrong={wrong}
+                    lastWrong={lastWrong}
+                    found={reveal?.bugLines ?? []}
+                    disabled={phase !== "hunt" || busy}
+                    onPick={guess}
+                  />
+                </section>
+                {error && phase === "hunt" && <p className="error" role="alert">{error}</p>}
+              </>
+            )}
+          </div>
+
+          <div className={`rail ${phase === "hunt" ? "rail-live" : ""}`}>
+            {(phase === "setup" || phase === "planting") && <HowItWorks active={phase === "setup" ? 0 : 1} />}
+            {phase === "hunt" && (
+              <HuntPanel
+                startedAt={startedAt}
+                penalty={penalty}
+                temperature={temp}
+                lastWrong={lastWrong}
+                wrongGuesses={wrong.length}
+                hint={hint}
+                busy={busy}
+                onHint={askHint}
+                onGiveUp={giveUp}
+              />
+            )}
+            {phase === "reveal" && result && (
+              <ResultCard
                 found={result.found}
                 seconds={result.seconds}
                 penalty={penalty}
@@ -177,37 +238,10 @@ export default function Page() {
                 onAgain={() => source && plant(source, usedLines)}
                 onNew={newCode}
               />
-            </div>
-          )}
-          {phase === "hunt" && (
-            <HuntPanel
-              startedAt={startedAt}
-              penalty={penalty}
-              temperature={temp}
-              lastWrong={lastWrong}
-              hint={hint}
-              busy={busy}
-              onHint={askHint}
-              onGiveUp={giveUp}
-            />
-          )}
-          <div className="huntbar">
-            <span className="filepath">
-              <strong>{drill.file}</strong>
-              {drill.commit && ` @ ${drill.commit.sha.slice(0, 7)} · ${drill.commit.message}`}
-            </span>
+            )}
           </div>
-          <CodeView
-            regions={drill.regions}
-            wrong={wrong}
-            lastWrong={lastWrong}
-            found={reveal?.bugLines ?? []}
-            disabled={phase !== "hunt" || busy}
-            onPick={guess}
-          />
-          {error && phase === "hunt" && <p className="error" role="alert">{error}</p>}
-        </>
-      )}
-    </main>
+        </div>
+      </main>
+    </div>
   );
 }

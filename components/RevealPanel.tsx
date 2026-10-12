@@ -20,35 +20,14 @@ function highlight(line: string, other: string) {
   );
 }
 
-type Props = {
-  reveal: Reveal;
-  found: boolean;
-  seconds: number;
-  penalty: number;
-  wrongGuesses: number;
-  usedHint: boolean;
-  error: string | null;
-  onAgain: () => void;
-  onNew: () => void;
-};
-
-export function RevealPanel({ reveal, found, seconds, penalty, wrongGuesses, usedHint, error, onAgain, onNew }: Props) {
+/** Centre column: what changed, and why it would bite. */
+export function RevealDiff({ reveal }: { reveal: Reveal }) {
   const before = reveal.original.split("\n");
   const after = reveal.mutated.split("\n");
-  const rows = before
-    .map((b, i) => ({ b, a: after[i] ?? "" }))
-    .filter(({ b, a }) => b.trimEnd() !== a.trimEnd());
-
+  const rows = before.map((b, i) => ({ b, a: after[i] ?? "" })).filter(({ b, a }) => b.trimEnd() !== a.trimEnd());
   return (
-    <section className="panel reveal">
-      <h2 className={found ? "found" : "missed"}>{found ? `Got it, ${Math.round(seconds)}s.` : "Here's what would have shipped."}</h2>
-      <div className="stats-row">
-        <div className="stat"><b>{found ? formatTime(seconds) : "—"}</b><span>final time</span></div>
-        <div className="stat"><b>+{penalty}s</b><span>penalties</span></div>
-        <div className="stat"><b>{wrongGuesses}</b><span>wrong {wrongGuesses === 1 ? "guess" : "guesses"}</span></div>
-        <div className="stat"><b>{usedHint ? "yes" : "no"}</b><span>hint</span></div>
-      </div>
-      <div className="row">
+    <section className="card reveal reveal-diff">
+      <div className="reveal-head">
         <span className="chip">{CATEGORY_LABEL[reveal.category] ?? reveal.category}</span>
         <span className="hint-text">line {reveal.bugLines.join(", ")}</span>
       </div>
@@ -61,7 +40,33 @@ export function RevealPanel({ reveal, found, seconds, penalty, wrongGuesses, use
         ))}
       </div>
       <p className="lesson">{reveal.lesson}</p>
-      <div className="row">
+    </section>
+  );
+}
+
+type ResultProps = {
+  found: boolean;
+  seconds: number;
+  penalty: number;
+  wrongGuesses: number;
+  usedHint: boolean;
+  error: string | null;
+  onAgain: () => void;
+  onNew: () => void;
+};
+
+/** Rail: the outcome and what to do next. */
+export function ResultCard({ found, seconds, penalty, wrongGuesses, usedHint, error, onAgain, onNew }: ResultProps) {
+  return (
+    <section className={`card reveal result ${found ? "is-found" : "is-missed"}`}>
+      <h2>{found ? `Got it, ${Math.round(seconds)}s.` : "Here's what would have shipped."}</h2>
+      <div className="stats-grid">
+        <div className="stat"><b>{found ? formatTime(seconds) : "—"}</b><span>final time</span></div>
+        <div className="stat"><b>+{penalty}s</b><span>penalties</span></div>
+        <div className="stat"><b>{wrongGuesses}</b><span>wrong {wrongGuesses === 1 ? "guess" : "guesses"}</span></div>
+        <div className="stat"><b>{usedHint ? "yes" : "no"}</b><span>hint</span></div>
+      </div>
+      <div className="hunt-actions">
         <button className="btn btn-primary" onClick={onAgain}>Drill again</button>
         <button className="btn" onClick={onNew}>New code</button>
       </div>

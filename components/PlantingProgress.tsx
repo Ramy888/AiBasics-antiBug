@@ -14,14 +14,19 @@ export function PlantingProgress({ onCancel }: { onCancel: () => void }) {
   }, []);
 
   return (
-    <section className="panel planting" aria-live="polite">
-      {STEPS.map((label, i) => (
-        <div key={label} className={`step ${i < step ? "done" : i === step ? "active" : ""}`}>
-          <span className="dot" /> {label}
-        </div>
-      ))}
+    <section className="card planting" aria-live="polite">
+      <div className="progress" aria-hidden="true"><span /></div>
+      <h1 className="page-title">Planting a bug</h1>
+      <p className="muted">Usually 5–20 seconds.</p>
+      <div className="steps">
+        {STEPS.map((label, i) => (
+          <div key={label} className={`step ${i < step ? "done" : i === step ? "active" : ""}`}>
+            <span className="dot" /> {label}
+          </div>
+        ))}
+      </div>
       <div>
-        <button className="btn" onClick={onCancel}>Cancel</button>
+        <button className="btn btn-quiet" onClick={onCancel}>Cancel</button>
       </div>
     </section>
   );

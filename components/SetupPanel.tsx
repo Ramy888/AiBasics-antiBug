@@ -59,10 +59,7 @@ export function SetupPanel({ initial, error, onCommitsLoaded, onCommit, onPaste 
   }
 
   return (
-    <section className="panel">
-      <p className="lede">
-        <strong>Your agent wrote it. Did you read it?</strong> antiBug plants one subtle logic bug in code you just shipped. Find the line.
-      </p>
+    <section className="card setup">
       <div className="tabs" role="tablist">
         <button role="tab" aria-selected={tab === "github"} className={`tab ${tab === "github" ? "on" : ""}`} onClick={() => setTab("github")}>
           From GitHub

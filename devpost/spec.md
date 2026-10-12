@@ -41,7 +41,7 @@ PRD ref: `prd.md > The Core Journey`.
 Paste mode replaces step 1, and the GitHub part of step 2, with `POST /api/drill {code, filename}`. The whole snippet counts as added lines.
 
 ## Stack
-- **Next.js (App Router), TypeScript, React.** One project for the page and the API routes, and a one-click deploy on Vercel if wanted. Docs: https://nextjs.org/docs. Version: whatever `create-next-app@latest` installs (pinned in `package.json`).
+- **Next.js (App Router), TypeScript, React.** One project for the page and the API routes, deployed to Cloudflare Workers through the OpenNext adapter (`@opennextjs/cloudflare`). Docs: https://nextjs.org/docs. Version: whatever `create-next-app@latest` installs (pinned in `package.json`).
 - **`@anthropic-ai/sdk`.** The official Claude SDK, for the plant call. Docs: https://platform.claude.com/docs/en/api/sdks/typescript
 - **`zod`.** Describes the JSON shape Claude must return, and checks it. https://zod.dev
 - **`typescript` (compiler API) for the parse check.** `ts.transpileModule(..., { reportDiagnostics: true })` reports syntax errors for both JS and TS, so one dependency covers both. https://github.com/microsoft/TypeScript/wiki/Using-the-Compiler-API
@@ -59,7 +59,8 @@ Paste mode replaces step 1, and the GitHub part of step 2, with `POST /api/drill
   - `ANTIBUG_SECRET`: a 32+ character secret for sealing answers. Optional locally (a random one is generated at start-up); **required** when deployed.
   - `GITHUB_TOKEN`: optional. Raises GitHub's limit from 60 to 5,000 requests per hour.
 - **Demo recording:** the local app, driven by the headless recording pipeline. The demo drills the antiBug repo's own commits, so the repo must be public by then. Paste mode works without it.
-- **Submission:** a demo video under 3 minutes plus a public GitHub repo with a license showing in the About section. Deployment is **optional** (Vercel, set up in `6-ship` only with Ramy's authorization, because a public URL spends his API budget).
+- **Deployed:** https://antibug.ramy-comm.workers.dev on Cloudflare Workers (Ramy authorized it in `6-ship` prep). `npm run deploy` copies the repo without `.env` files (OpenNext would otherwise bake them into the bundle), builds with webpack, and deploys. Secrets live in Workers secrets: `ANTHROPIC_API_KEY`, `ANTIBUG_SECRET`, `GITHUB_TOKEN`. GitHub's token matters more here: Cloudflare's shared IPs would exhaust the 60-per-hour anonymous limit. It stays up through the judging period (to Oct 30), since the rules ask for free access for judges.
+- **Submission:** a demo video under 3 minutes plus a public GitHub repo with a license showing in the About section, and the live URL in the testing instructions.
 
 ## Look and Feel
 From `prd.md > Look and Feel` (accepted by Ramy):
@@ -120,11 +121,11 @@ It returns either `{ ok, sabotagedContent, bugLines }` or `{ ok: false, reason }
 PRD ref: `prd.md > Planting the bug`.
 
 ### Answer Seal
-`lib/seal.ts`. `seal(payload)` / `open(token)` with AES-256-GCM. The key is SHA-256 of `ANTIBUG_SECRET`, or a random per-process key when unset. The payload is `{ bugLines, original, mutated, category, lesson, file, iat }`. Tokens expire after 1 hour, and tampered tokens are rejected.
+`lib/seal.ts`. `seal(payload)` / `open(token)` with AES-256-GCM. The key is SHA-256 of `ANTIBUG_SECRET`. In development a random per-process key is used when it's unset; in production a missing secret is an error, because separate server copies would each seal with their own key. The payload is `{ bugLines, original, mutated, category, lesson, file, iat }`. Tokens expire after 1 hour, and tampered tokens are rejected.
 PRD ref: `prd.md > The hunt` (the answer is not exposed).
 
 ### Rate Limiter
-`lib/ratelimit.ts`. An in-memory sliding window per client IP: 10 drills per hour (`/api/drill` only). It's best-effort and per server instance, which is fine for a proof of concept.
+`lib/ratelimit.ts`. A one-hour sliding window per client IP (`lib/window.ts`): 10 drills per hour by default (`ANTIBUG_DRILLS_PER_HOUR`), `/api/drill` only. On Cloudflare each IP gets its own Durable Object (`lib/drill-limiter.ts`, binding `DRILL_LIMITER`), so every server copy shares one count. Elsewhere (`next dev`, `next start`, tests) it falls back to an in-memory count per process. The client IP comes from `cf-connecting-ip`, then `x-forwarded-for`.
 PRD ref: `prd.md > States and Boundaries`.
 
 ### API Routes
@@ -193,11 +194,17 @@ AiBasics-antiBug/
 │   ├── validate.ts           # Checker
 │   ├── seal.ts               # Answer Seal
 │   ├── ratelimit.ts          # Rate Limiter
+│   ├── window.ts             # one-hour sliding window (shared)
+│   ├── drill-limiter.ts      # Durable Object: one drill count per IP on Cloudflare
 │   ├── streak.ts             # Streak Store (browser)
 │   ├── history.ts            # History Store (browser)
 │   └── errors.ts             # shared error codes/messages
 ├── tests/                    # vitest: target, validate, seal, routes (Claude mocked)
 ├── devpost/                  # Devpost Learn planning docs
+├── worker.ts                 # Cloudflare entry: OpenNext handler + DrillLimiter
+├── wrangler.jsonc            # Worker name, Durable Object binding, drill limit
+├── open-next.config.ts       # OpenNext build (webpack)
+├── scripts/deploy.sh         # builds from a copy without .env, then deploys
 ├── .env.example              # placeholder env vars, no secrets
 ├── LICENSE                   # MIT
 └── README.md                 # what it is, setup, run
@@ -221,7 +228,7 @@ AiBasics-antiBug/
 
 ## What Was Simplified and Why
 - **A sealed token** instead of a server-side database of drills: no database to run, and it still hides the answer. The fuller version would store drills for replay and sharing.
-- **An in-memory rate limit** instead of a shared store (Redis/KV): good enough for one demo instance. Deployed at scale, it would need a shared KV store.
+- **A per-IP limit only** instead of accounts or a global budget: a Durable Object per IP keeps the count exact across server copies, and an Anthropic spend cap backs it up. Someone rotating IPs could still drill more; the fuller version would add a global daily cap.
 - **A syntax check only** instead of running the code or tests: proves "still compiles" without a sandbox. The fuller version would run the project's tests to prove the bug changes behaviour.
 - **Simulated progress steps** instead of streamed server progress: the call is one request, so the steps are cosmetic, and labelled as such here.
 

@@ -25,6 +25,20 @@ cp .env.example .env      # then set ANTHROPIC_API_KEY
 npm run dev               # http://localhost:3000
 ```
 
+## Deploy (Cloudflare Workers)
+
+Live at **https://antibug.ramy-comm.workers.dev**. It runs on Workers through [OpenNext](https://opennext.js.org/cloudflare); the per-visitor drill limit is a Durable Object, so it holds across every server copy.
+
+```bash
+npx wrangler login
+npx wrangler secret put ANTHROPIC_API_KEY
+npx wrangler secret put ANTIBUG_SECRET    # any long random string: openssl rand -hex 32
+npx wrangler secret put GITHUB_TOKEN      # recommended: Cloudflare's shared IPs hit GitHub's anonymous limit
+npm run deploy
+```
+
+If your Cloudflare login can see several accounts, set `CLOUDFLARE_ACCOUNT_ID` first. `npm run deploy` builds from a copy of the repo without `.env` files, so local secrets never end up in the uploaded bundle. The drill limit is `ANTIBUG_DRILLS_PER_HOUR` in `wrangler.jsonc` (10).
+
 ## Tests
 
 ```bash
@@ -35,7 +49,7 @@ node scripts/verify-hunt.mjs http://localhost:3000   # headless browser run of t
 
 ## Stack
 
-Next.js (App Router) + TypeScript, `@anthropic-ai/sdk` with structured outputs, zod, the TypeScript compiler API as the parse check, Node `crypto`, Vitest.
+Next.js (App Router) + TypeScript on Cloudflare Workers (OpenNext, one Durable Object for the drill limit), `@anthropic-ai/sdk` with structured outputs, zod, the TypeScript compiler API as the parse check, Node `crypto`, Vitest.
 
 ## How it was planned
 

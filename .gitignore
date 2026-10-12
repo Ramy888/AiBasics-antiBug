@@ -12,6 +12,9 @@ node_modules/
 out/
 coverage/
 .vercel/
+.open-next/
+.wrangler/
+.dev.vars*
 *.tsbuildinfo
 next-env.d.ts
 

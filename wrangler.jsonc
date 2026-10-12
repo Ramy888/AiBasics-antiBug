@@ -1,0 +1,14 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "antibug",
+  // worker.ts wraps the OpenNext build output and adds the DrillLimiter Durable Object.
+  "main": "worker.ts",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  "observability": { "enabled": true },
+  "durable_objects": { "bindings": [{ "name": "DRILL_LIMITER", "class_name": "DrillLimiter" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["DrillLimiter"] }],
+  // Secrets (set once with `npx wrangler secret put <NAME>`): ANTHROPIC_API_KEY, ANTIBUG_SECRET, GITHUB_TOKEN.
+  "vars": { "ANTIBUG_DRILLS_PER_HOUR": "10" }
+}

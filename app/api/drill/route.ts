@@ -14,7 +14,7 @@ const Body = z.union([
 export async function POST(req: Request) {
   try {
     const body = await readBody(req, Body);
-    takeDrill(clientIp(req));
+    await takeDrill(clientIp(req));
     const drill = "code" in body ? drillPasted(body.code, body.filename, body.avoidLines) : drillCommit(body.repo, body.sha, body.avoidLines);
     return Response.json(await drill);
   } catch (err) {

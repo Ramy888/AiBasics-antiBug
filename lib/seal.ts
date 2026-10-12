@@ -14,13 +14,16 @@ export type Answer = {
 
 const TTL_SECONDS = 60 * 60;
 
-// One random key per server process when no secret is configured. Kept on globalThis so
+// In development, one random key per server process when no secret is configured. Kept on globalThis so
 // Next's dev hot reload doesn't invalidate tokens that are already in a browser.
 const g = globalThis as { __antibugKey?: Buffer };
 
 function key(): Buffer {
   const secret = process.env.ANTIBUG_SECRET;
   if (secret) return createHash("sha256").update(secret).digest();
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("ANTIBUG_SECRET must be set when deployed: each server copy would otherwise seal with its own key");
+  }
   g.__antibugKey ??= randomBytes(32);
   return g.__antibugKey;
 }

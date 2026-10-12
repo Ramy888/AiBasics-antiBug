@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { open, seal } from "@/lib/seal";
 
 const answer = { bugLines: [15], original: "a >= b", mutated: "a > b", category: "comparison", lesson: "Boundary.", file: "cart.ts" };
@@ -28,5 +28,15 @@ describe("seal", () => {
     const token = seal(answer, issued);
     expect(() => open(token, issued + 59 * 60 * 1000)).not.toThrow();
     expect(() => open(token, issued + 61 * 60 * 1000)).toThrow(/expired/);
+  });
+
+  describe("when deployed", () => {
+    afterEach(() => vi.unstubAllEnvs());
+
+    it("refuses to seal without ANTIBUG_SECRET, since server copies would not share a random key", () => {
+      vi.stubEnv("NODE_ENV", "production");
+      vi.stubEnv("ANTIBUG_SECRET", "");
+      expect(() => seal(answer)).toThrow(/ANTIBUG_SECRET/);
+    });
   });
 });

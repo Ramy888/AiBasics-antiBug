@@ -29,11 +29,16 @@ export function isEligible(path: string): boolean {
   return JS_TS.test(path) && !path.endsWith(".d.ts") && !/\.min\.[cm]?js$/.test(path) && !/(^|\/)(node_modules|dist|vendor)\//.test(path);
 }
 
-/** Eligible files with at least 3 added lines, most added lines first. */
+/** Test files: a planted bug there skips or weakens a check rather than breaking shipped logic. */
+export function isTestFile(path: string): boolean {
+  return /(^|\/)(tests?|__tests__|specs?)\//.test(path) || /[._](test|spec)\.[cm]?[jt]sx?$/.test(path);
+}
+
+/** Eligible files with at least 3 added lines: source before tests, then most added lines first. */
 export function rankTargets(files: CommitFile[]): CommitFile[] {
   return files
     .filter((f) => f.status !== "removed" && f.patch && isEligible(f.filename) && f.additions >= MIN_ADDED)
-    .sort((a, b) => b.additions - a.additions);
+    .sort((a, b) => Number(isTestFile(a.filename)) - Number(isTestFile(b.filename)) || b.additions - a.additions);
 }
 
 /** The changed hunks plus `context` lines either side, merged where they touch, with real line numbers. */

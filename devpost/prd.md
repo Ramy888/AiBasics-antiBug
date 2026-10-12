@@ -13,7 +13,7 @@ Source: `scope.md > The Unique Kernel`, `scope.md > The Core Loop`.
 2. **Choose code.**
    - *From GitHub:* paste a public repo URL (`https://github.com/owner/repo` or `owner/repo`) and press **Load commits**. The 10 most recent commits on the default branch appear (message, short hash, age). Pick one.
    - *Paste code:* paste up to 300 lines of JS/TS and press **Sabotage it**.
-3. **Plant.** A progress state shows "Reading your change…" → "Planting one bug…" → "Checking it still compiles…". antiBug picks the JS/TS file in that commit with the most added lines, and plants one logic bug inside the added lines. Typically takes 5–20 s.
+3. **Plant.** A progress state shows "Reading your change…" → "Planting one bug…" → "Checking it still compiles…". antiBug picks the JS/TS file in that commit with the most added lines (source files before test files), and plants one logic bug inside the added lines. Typically takes 5–20 s.
 4. **Hunt.** The changed code is shown with line numbers: the commit's changed regions with 3 lines of context, or the whole pasted snippet. One line is now broken. A timer runs. The header says which file and commit this is.
 5. **Guess.** Click the line you think is broken.
    - Wrong: the line shakes red, +10 s penalty, and a temperature hint appears (*hot* within 3 lines, *warm* within 10, otherwise *cold*).
@@ -48,7 +48,7 @@ Works on desktop first (the demo surface). On a phone it must not break, but pho
 - As an AI-assisted developer, I want to pick a recent commit from my public repo so that the drill uses code I just shipped.
   - [ ] Pasting `owner/repo` or a full GitHub URL lists up to 10 recent commits, newest first.
   - [ ] Picking a commit starts planting. Only JS/TS files (`.js .jsx .ts .tsx .mjs .cjs`, not `.d.ts`, minified, or lock files) with at least 3 added lines are eligible.
-  - [ ] The drilled file is the eligible file with the most added lines, and its path is shown during the hunt.
+  - [ ] The drilled file is the eligible file with the most added lines, preferring non-test files, and its path is shown during the hunt.
 
 ### Pasting code
 - As a developer without a public repo, I want to paste a snippet so that I can still drill.

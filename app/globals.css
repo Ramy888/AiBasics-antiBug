@@ -139,6 +139,7 @@ button, input, textarea { font: inherit; color: inherit; }
 .commit:hover { background: var(--panel-2); border-left-color: var(--bug); }
 .commit-msg { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .commit-meta { color: var(--muted); font-size: 12px; white-space: nowrap; }
+.commit-error { margin: 0; padding: 0 14px 10px 17px; }
 
 /* Hunt bar: timer, prompt, actions */
 .hunt {

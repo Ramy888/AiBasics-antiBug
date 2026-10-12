@@ -1,13 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { post } from "@/lib/api";
 import { MAX_PASTE_LINES } from "@/lib/shared";
 
-type Commit = { sha: string; message: string; date: string };
+export type Commit = { sha: string; message: string; date: string };
 
 type Props = {
-  initial: { tab: "github" | "paste"; repo: string; code: string };
+  // `commits` lives in the page so the list survives this panel unmounting while a drill plants.
+  // `failedSha` is the commit whose drill just failed; its error shows on that row.
+  initial: { tab: "github" | "paste"; repo: string; code: string; commits: Commit[] | null; failedSha: string | null };
+  onCommitsLoaded: (repo: string, commits: Commit[] | null) => void;
   error: string | null;
   onCommit: (repo: string, sha: string) => void;
   onPaste: (code: string, filename: string) => void;
@@ -21,23 +24,33 @@ function age(iso: string): string {
   return `${Math.round(s / 86400)}d ago`;
 }
 
-export function SetupPanel({ initial, error, onCommit, onPaste }: Props) {
+export function SetupPanel({ initial, error, onCommitsLoaded, onCommit, onPaste }: Props) {
   const [tab, setTab] = useState(initial.tab);
   const [repo, setRepo] = useState(initial.repo);
-  const [commits, setCommits] = useState<Commit[] | null>(null);
+  const [commits, setCommits] = useState<Commit[] | null>(initial.commits);
   const [loading, setLoading] = useState(false);
   const [listError, setListError] = useState<string | null>(null);
   const [code, setCode] = useState(initial.code);
   const [filename, setFilename] = useState("");
   const lines = code ? code.split("\n").length : 0;
+  const failedSha = error && commits?.some((c) => c.sha === initial.failedSha) ? initial.failedSha : null;
+  const failedRef = useRef<HTMLParagraphElement | null>(null);
+
+  // The panel remounts at the top of the page after planting; bring the failed row back into view.
+  useEffect(() => {
+    failedRef.current?.scrollIntoView({ block: "center" });
+  }, [failedSha]);
 
   async function loadCommits(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setListError(null);
     setCommits(null);
+    onCommitsLoaded(repo, null);
     try {
-      setCommits((await post<{ commits: Commit[] }>("/api/commits", { repo })).commits);
+      const { commits } = await post<{ commits: Commit[] }>("/api/commits", { repo });
+      setCommits(commits);
+      onCommitsLoaded(repo, commits);
     } catch (err) {
       setListError((err as Error).message);
     } finally {
@@ -74,7 +87,7 @@ export function SetupPanel({ initial, error, onCommit, onPaste }: Props) {
               {loading ? "Loading…" : "Load commits"}
             </button>
           </form>
-          <p className="hint-text" style={{ marginTop: 8 }}>Public repos only. We drill the JS/TS file with the most added lines in the commit you pick.</p>
+          <p className="hint-text" style={{ marginTop: 8 }}>Public repos only. We drill the JS/TS file with the most added lines in the commit you pick, skipping tests when there&apos;s other code.</p>
           {commits && commits.length === 0 && <p className="hint-text" style={{ marginTop: 12 }}>No commits found.</p>}
           {commits && commits.length > 0 && (
             <ul className="commits">
@@ -86,11 +99,16 @@ export function SetupPanel({ initial, error, onCommit, onPaste }: Props) {
                       {c.sha.slice(0, 7)} · {age(c.date)}
                     </span>
                   </button>
+                  {c.sha === failedSha && (
+                    <p ref={failedRef} className="error commit-error" role="alert">
+                      {error}
+                    </p>
+                  )}
                 </li>
               ))}
             </ul>
           )}
-          {(listError ?? error) && <p className="error" role="alert">{listError ?? error}</p>}
+          {(listError ?? (failedSha ? null : error)) && <p className="error" role="alert">{listError ?? error}</p>}
         </>
       ) : (
         <>

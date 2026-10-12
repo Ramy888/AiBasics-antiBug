@@ -26,7 +26,7 @@ PRD ref: `prd.md > The Core Journey`.
 1. The user enters `owner/repo` → the page calls `POST /api/commits` → the GitHub reader lists the 10 latest commits → the page shows them.
 2. The user picks a commit → `POST /api/drill {repo, sha}`:
    - the GitHub reader fetches the commit's files and patches;
-   - the target picker chooses the JS/TS file with the most added lines and fetches its full content at that commit;
+   - the target picker chooses the JS/TS file with the most added lines (non-test files first) and fetches its full content at that commit;
    - the saboteur asks Claude for a bug;
    - the checker validates it, retrying if needed;
    - the server seals the answer into a token.
@@ -89,7 +89,7 @@ PRD ref: `prd.md > Loading code from GitHub`, `prd.md > States and Boundaries`.
 `lib/target.ts`. Pure functions.
 - `parsePatch(patch)` → the hunks' new-file line ranges and the **added line numbers**.
 - `isEligible(path)`: JS/TS extensions, excludes `.d.ts`, `*.min.js` and lock files.
-- `pickTarget(files)`: the eligible file with the most added lines, at least 3.
+- `pickTarget(files)`: the eligible file with the most added lines, at least 3; non-test files rank ahead of test files.
 - `displayRegions(content, hunks, context=3)`: merged line ranges, each line numbered.
 
 For pasted code, every line counts as added and there is one region.

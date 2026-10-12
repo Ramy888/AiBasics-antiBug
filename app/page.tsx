@@ -6,7 +6,7 @@ import { Header } from "@/components/Header";
 import { HuntPanel } from "@/components/HuntPanel";
 import { PlantingProgress } from "@/components/PlantingProgress";
 import { RevealPanel, type Reveal } from "@/components/RevealPanel";
-import { SetupPanel } from "@/components/SetupPanel";
+import { SetupPanel, type Commit } from "@/components/SetupPanel";
 import { post } from "@/lib/api";
 import type { DrillResponse, Temperature } from "@/lib/shared";
 import { recordFound, recordGiveUp, serverStreak, streakSnapshot, subscribeStreak } from "@/lib/streak";
@@ -21,7 +21,13 @@ const PLANT_TIMEOUT_MS = 60_000;
 export default function Page() {
   const [phase, setPhase] = useState<Phase>("setup");
   const [error, setError] = useState<string | null>(null);
-  const [setup, setSetup] = useState<{ tab: "github" | "paste"; repo: string; code: string }>({ tab: "github", repo: "", code: "" });
+  const [setup, setSetup] = useState<{ tab: "github" | "paste"; repo: string; code: string; commits: Commit[] | null; failedSha: string | null }>({
+    tab: "github",
+    repo: "",
+    code: "",
+    commits: null,
+    failedSha: null,
+  });
   const [source, setSource] = useState<Source | null>(null);
   // Bug lines already drilled on this source, so "Drill again" plants somewhere new.
   const [usedLines, setUsedLines] = useState<number[]>([]);
@@ -74,13 +80,13 @@ export default function Page() {
   }
 
   function startCommit(repo: string, sha: string) {
-    setSetup({ tab: "github", repo, code: "" });
+    setSetup((s) => ({ ...s, tab: "github", repo, failedSha: sha }));
     setUsedLines([]);
     plant({ repo, sha }, []);
   }
 
   function startPaste(code: string, filename: string) {
-    setSetup({ tab: "paste", repo: "", code });
+    setSetup((s) => ({ ...s, tab: "paste", code }));
     setUsedLines([]);
     plant({ code, filename: filename || undefined }, []);
   }
@@ -141,7 +147,13 @@ export default function Page() {
       <Header streak={streak} />
       {phase === "setup" && (
         <>
-          <SetupPanel initial={setup} error={error} onCommit={startCommit} onPaste={startPaste} />
+          <SetupPanel
+            initial={setup}
+            error={error}
+            onCommitsLoaded={(repo, commits) => setSetup((s) => ({ ...s, repo, commits }))}
+            onCommit={startCommit}
+            onPaste={startPaste}
+          />
           <ol className="how">
             <li><b>1</b> Pick a commit your agent just wrote, or paste code.</li>
             <li><b>2</b> antiBug plants one realistic logic bug in the changed lines. It still compiles.</li>

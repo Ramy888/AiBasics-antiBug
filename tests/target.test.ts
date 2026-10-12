@@ -47,6 +47,16 @@ describe("isEligible / rankTargets", () => {
     expect(rankTargets(files).map((f) => f.filename)).toEqual(["src/big.ts", "bench/index.js"]);
     expect(rankTargets([commit.files[1]])).toEqual([]); // package.json only
   });
+
+  it("ranks source files ahead of tests, falling back to tests when nothing else changed", () => {
+    const f = (filename: string, additions: number): CommitFile => ({ filename, status: "modified", additions, patch: "@@" });
+    const tests = [f("tests/canonical_test.ts", 400), f("src/a.test.tsx", 300), f("lib/b.spec.js", 200), f("__tests__/c.js", 100)];
+    expect(rankTargets([...tests, f("src/routes/settlements.js", 164)]).map((x) => x.filename)).toEqual([
+      "src/routes/settlements.js",
+      ...tests.map((x) => x.filename),
+    ]);
+    expect(rankTargets(tests)[0].filename).toBe("tests/canonical_test.ts");
+  });
 });
 
 describe("displayRegions", () => {

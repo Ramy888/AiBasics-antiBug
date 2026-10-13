@@ -56,3 +56,7 @@ Next.js (App Router) + TypeScript on Cloudflare Workers (OpenNext, one Durable O
 ## How it was planned
 
 Built with the Devpost Learn skill pack: the scope, PRD, technical spec and build checklist are in [`devpost/`](devpost/).
+
+## License
+
+MIT — see [LICENSE](LICENSE).

@@ -21,7 +21,7 @@ A code-review tool with the tension of a timed game: dark, editor-like, monospac
 Research context: Anthropic's Jan 2026 study of AI assistance and coding skills (https://www.anthropic.com/research/AI-assistance-coding-skills). It measured comprehension of a new library, not real-world debugging, so cite it with care.
 
 ## Why This Matters to the Learner
-Ramy builds most of his hackathon code with agents across many parallel entries. The risk he lives with is shipping AI code he never fully read. antiBug is the habit the Devpost Learn pack teaches (plan, then *review* what the AI builds), turned into a tool he would use himself.
+Ramy builds most of his code with AI agents. The risk he lives with is shipping AI code he never fully read. antiBug is the habit the Devpost Learn pack teaches (plan, then *review* what the AI builds), turned into a tool he would use himself.
 
 ## What "Working" Looks Like
 In the local app: paste the antiBug repo's own URL and pick the commit from earlier today. A bug is planted in seconds, the timer runs, one wrong click shows "colder", the next click is right. The reveal highlights the flipped `>=`, with the lesson and a time of about 40 s.

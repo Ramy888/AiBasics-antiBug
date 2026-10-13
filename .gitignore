@@ -26,3 +26,11 @@ npm-debug.log*
 
 # Screenshots from local verification scripts
 /scripts/**/*.png
+
+# Agent tooling (the Devpost Learn skill pack and agent notes) — local only
+/.agents/
+/agent/
+/.claude/
+/skills-lock.json
+/AGENTS.md
+CLAUDE.md

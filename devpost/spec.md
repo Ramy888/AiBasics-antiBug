@@ -240,4 +240,4 @@ AiBasics-antiBug/
 - **Learner uncertainty:** none identified yet. Ramy hasn't raised one, and none is invented here.
 - **Open, agent-side:** confirm that structured output + `fallbacks: "default"` work together (first slice). Judge bug subtlety at the first hands-on checkpoint; if bugs are too obvious, tighten the prompt (and only then consider the deferred "judge" pass).
 - **Resolved with Ramy:** look and feel accepted; `ANTHROPIC_API_KEY` placed in `.env`.
-- **Open, needs Ramy (6-ship):** make the repo public before recording, since the demo drills its own commits.
+- **Resolved in 6-ship:** the demo video drills the built-in sample, so it didn't need the repo public; the repo goes public before the submission deadline.

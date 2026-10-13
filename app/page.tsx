@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { CodeView } from "@/components/CodeView";
+import { SAMPLE } from "@/lib/sample";
 import { HowItWorks } from "@/components/HowItWorks";
 import { HuntPanel } from "@/components/HuntPanel";
 import { PlantingProgress } from "@/components/PlantingProgress";
@@ -182,6 +183,7 @@ export default function Page() {
                   onCommitsLoaded={(repo, commits) => setSetup((s) => ({ ...s, repo, commits }))}
                   onCommit={startCommit}
                   onPaste={startPaste}
+                  onSample={() => startPaste(SAMPLE.code, SAMPLE.filename)}
                 />
               </>
             )}
@@ -204,6 +206,7 @@ export default function Page() {
                     lastWrong={lastWrong}
                     found={reveal?.bugLines ?? []}
                     disabled={phase !== "hunt" || busy}
+                    labelled={phase === "reveal"}
                     onPick={guess}
                   />
                 </section>

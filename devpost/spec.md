@@ -142,7 +142,7 @@ PRD ref: `prd.md > The Core Journey`.
 `app/page.tsx` (client component). A state machine `setup → planting → hunt → reveal` that owns the timer, penalties, wrong guesses and session `avoidLines`. Subcomponents live in `components/`:
 - `Sidebar` (wordmark, streak and best-time tiles, recent drills);
 - `HowItWorks` (the three steps, in the right-hand panel during setup and planting);
-- `SetupPanel` (tabs, repo input, commit list, paste area);
+- `SetupPanel` (tabs, **Try a sample**, repo input, commit list, paste area);
 - `PlantingProgress` (three-step message, since the progress is simulated client-side while the request runs);
 - `HuntPanel` (right-hand panel: `Timer`, feedback, wrong clicks, Hint, Give up) beside `CodeView` (gutter, clickable lines, shake/pulse);
 - `RevealPanel`: `RevealDiff` (before/after and lesson, centre) and `ResultCard` (outcome, stats, actions, right-hand panel).
@@ -194,6 +194,7 @@ AiBasics-antiBug/
 │   ├── validate.ts           # Checker
 │   ├── seal.ts               # Answer Seal
 │   ├── ratelimit.ts          # Rate Limiter
+│   ├── sample.ts             # the Try a sample file (same as tests/fixtures/cart.ts)
 │   ├── window.ts             # one-hour sliding window (shared)
 │   ├── drill-limiter.ts      # Durable Object: one drill count per IP on Cloudflare
 │   ├── streak.ts             # Streak Store (browser)

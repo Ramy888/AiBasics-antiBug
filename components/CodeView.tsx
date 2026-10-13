@@ -8,10 +8,12 @@ type Props = {
   found: number[];
   lastWrong: number | null;
   disabled: boolean;
+  /** After the reveal: name the marked lines, since red and green alone don't say whose they are. */
+  labelled?: boolean;
   onPick: (line: number) => void;
 };
 
-export function CodeView({ regions, wrong, found, lastWrong, disabled, onPick }: Props) {
+export function CodeView({ regions, wrong, found, lastWrong, disabled, labelled = false, onPick }: Props) {
   return (
     <div className="code" role="list" aria-label="Sabotaged code. Click the broken line.">
       {regions.map((region, r) => (
@@ -32,6 +34,7 @@ export function CodeView({ regions, wrong, found, lastWrong, disabled, onPick }:
               >
                 <span className="num">{n}</span>
                 <span className="txt">{text || " "}</span>
+                {labelled && state && <span className="line-tag">{state === "found" ? "planted bug" : "your click"}</span>}
               </button>
             );
           })}

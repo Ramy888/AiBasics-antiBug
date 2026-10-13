@@ -9,7 +9,7 @@ A timed debugging drill for developers who build with AI agents: antiBug plants 
 Source: `scope.md > The Unique Kernel`, `scope.md > The Core Loop`.
 
 ## The Core Journey
-1. **Arrive.** The page explains the idea in one sentence and shows two ways in: *From GitHub* (default) and *Paste code*. The streak, best time and recent drills are shown in the sidebar (empty on first visit).
+1. **Arrive.** The page explains the idea in one sentence and shows two ways in: *From GitHub* (default) and *Paste code*, plus a **Try a sample** button that starts a drill on a built-in file in one click. The streak, best time and recent drills are shown in the sidebar (empty on first visit).
 2. **Choose code.**
    - *From GitHub:* paste a public repo URL (`https://github.com/owner/repo` or `owner/repo`) and press **Load commits**. The 10 most recent commits on the default branch appear (message, short hash, age). Pick one.
    - *Paste code:* paste up to 300 lines of JS/TS and press **Sabotage it**.
@@ -56,6 +56,10 @@ Works on desktop first (the demo surface). On a phone the sidebar becomes a top 
   - [ ] Up to 300 lines are accepted; more shows a clear limit message.
   - [ ] The whole snippet counts as "changed lines".
 
+### Trying a sample
+- As a first-time visitor (or a judge) with no code to hand, I want one click to a drill so that I can see the idea work before bringing my own code.
+  - [ ] **Try a sample**, next to the tabs, plants a bug in a small built-in shopping-cart file (`cart.ts`) and starts the hunt.
+
 ### Planting the bug
 - As a user, I want one realistic, subtle logic bug so that finding it takes reading, not luck.
   - [ ] The bug sits on a line that was added in the commit (or anywhere in a pasted snippet).
@@ -74,7 +78,9 @@ Works on desktop first (the demo surface). On a phone the sidebar becomes a top 
 
 ### The reveal
 - As a user, I want to see what I'd have shipped and why it matters so that the lesson sticks.
-  - [ ] The original and sabotaged lines are shown together, with the changed part emphasised.
+  - [ ] The original and sabotaged lines are shown together, labelled *original* and *planted*, with the changed part emphasised.
+  - [ ] In the code, the planted line is tagged *planted bug* and each wrong click *your click*.
+  - [ ] After giving up, the result shows wrong guesses and hint use only; time and penalties apply to finds.
   - [ ] A lesson of at most two sentences explains the effect.
   - [ ] The final time = clock + penalties.
 

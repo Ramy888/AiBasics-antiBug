@@ -8,7 +8,7 @@ Built for developers who work with AI coding agents and merge code they only ski
 
 ## How it works
 
-1. **Pick code.** A recent commit from a public repo, or up to 300 pasted lines of JS/TS.
+1. **Pick code.** A recent commit from a public repo, up to 300 pasted lines of JS/TS, or **Try a sample** for a one-click drill on a built-in file.
 2. **Plant.** Claude (Opus 5.5) proposes one subtle bug in the changed lines as strict JSON. A plain-code checker rejects anything that isn't a real bug: it must sit on an added line, change 1–3 lines, change runtime behaviour (not whitespace, comments or types), and the file must still parse. Rejected bugs go back to Claude with the reason, up to 3 attempts.
 3. **Hunt.** The answer is sealed in an AES-256-GCM token that only the server can open, so it isn't visible in the browser's dev tools. Wrong clicks cost 10 s and tell you hot / warm / cold; a hint names the bug's category for 15 s.
 4. **Reveal.** Your line next to the planted one, a two-sentence lesson, your time, and a streak kept in your browser.

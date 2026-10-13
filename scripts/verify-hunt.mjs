@@ -19,11 +19,11 @@ const clickLine = (n) => q(`document.querySelector('[aria-label="Line ${n}"]').c
 
 try {
   await b.goto(base, 3000);
-  await b.click("Paste code");
-  await q(`(() => { const t = document.querySelector('textarea'); t.focus(); })()`);
-  await b.type(code);
-  await b.click("Sabotage it");
+  // A first-time visitor with no code to hand: one click to a drill on the built-in sample.
+  await b.click("Try a sample");
   await waitFor(`!!document.querySelector('.timer')`);
+  const shown = await q(`[...document.querySelectorAll('.line .txt')].map((e) => e.textContent).join("\\n")`);
+  check(shown.split("\n").length === code.trimEnd().split("\n").length && (await q(`document.querySelector('.code-card').textContent.includes('cart.ts')`)), "Try a sample drills cart.ts in one click");
   const huntStart = Date.now();
 
   const t1 = toSec(await timerText()); await sleep(1500); const t2 = toSec(await timerText());
@@ -32,14 +32,17 @@ try {
   // Find a wrong line: click from the top until we get temperature feedback rather than the reveal.
   let penalty = 0, n = 1;
   for (; n <= (await lineCount()); n++) {
-    await clickLine(n); await sleep(600);
+    await clickLine(n);
+    // Wait for the server's answer (slower against a deployed URL than on localhost).
+    await waitFor(`!!document.querySelector('.reveal') || document.querySelector('.feedback')?.textContent.startsWith('Not line ${n}.')`, 15_000);
     if (await q(`!!document.querySelector('.reveal')`)) break;
     penalty += 10;
     const fb = await q(`document.querySelector('.feedback').textContent`);
     const pen = await q(`document.querySelector('.penalty')?.textContent`);
     check(/^Not line \d+\. (Hot|Warm|Cold)/.test(fb) && pen === `+${penalty}s`, `wrong click on line ${n}: "${fb}" ${pen}`);
     if (penalty === 10) {
-      await b.click("Hint", { gone: true }); await sleep(600);
+      await b.click("Hint", { gone: true });
+      await waitFor(`!!document.querySelector('.hunt .chip')`, 15_000);
       penalty += 15;
       const chip = await q(`document.querySelector('.hunt .chip')?.textContent`);
       check(!!chip && (await q(`document.querySelector('.penalty').textContent`)) === `+${penalty}s`, `hint shows "${chip}" and adds 15s`);
@@ -60,8 +63,18 @@ try {
   await b.click("Drill again");
   await waitFor(`!!document.querySelector('.timer')`);
   check((await q(`document.querySelector('.penalty')`)) === null, "drill again resets penalties");
+  // Line 1 is a type declaration, so it's never the planted (runtime) bug: a guaranteed wrong click.
+  await clickLine(1);
+  await waitFor(`document.querySelector('.feedback')?.textContent.startsWith('Not line 1.')`, 15_000);
   await b.click("Give up");
   await waitFor(`!!document.querySelector('.reveal')`);
+  const tags = await q(`[...document.querySelectorAll('.diff-row .tag')].map((e) => e.textContent).join(",")`);
+  check(tags.startsWith("original,planted"), `reveal labels the original and planted lines: ${tags}`);
+  const wrongTag = await q(`document.querySelector('.line.wrong .line-tag')?.textContent`);
+  const bugTag = await q(`document.querySelector('.line.found .line-tag')?.textContent`);
+  check(wrongTag === "your click" && bugTag === "planted bug", `code marks your click and the bug: "${wrongTag}", "${bugTag}"`);
+  const missedStats = await q(`[...document.querySelectorAll('.stat span')].map((e) => e.textContent).join(",")`);
+  check(!missedStats.includes("penalties") && !missedStats.includes("final time"), `missed result skips time and penalties: ${missedStats}`);
   const secondBug = await q(`document.querySelector('.reveal .hint-text').textContent`);
   check(secondBug !== firstBug, `drill again plants elsewhere (${firstBug} → ${secondBug})`);
   check((await q(`document.querySelector('.reveal h2').textContent`)).startsWith("Here's what"), "give up shows the missed reveal");

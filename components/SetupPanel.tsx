@@ -14,6 +14,7 @@ type Props = {
   error: string | null;
   onCommit: (repo: string, sha: string) => void;
   onPaste: (code: string, filename: string) => void;
+  onSample: () => void;
 };
 
 function age(iso: string): string {
@@ -24,7 +25,7 @@ function age(iso: string): string {
   return `${Math.round(s / 86400)}d ago`;
 }
 
-export function SetupPanel({ initial, error, onCommitsLoaded, onCommit, onPaste }: Props) {
+export function SetupPanel({ initial, error, onCommitsLoaded, onCommit, onPaste, onSample }: Props) {
   const [tab, setTab] = useState(initial.tab);
   const [repo, setRepo] = useState(initial.repo);
   const [commits, setCommits] = useState<Commit[] | null>(initial.commits);
@@ -66,6 +67,10 @@ export function SetupPanel({ initial, error, onCommitsLoaded, onCommit, onPaste 
         </button>
         <button role="tab" aria-selected={tab === "paste"} className={`tab ${tab === "paste" ? "on" : ""}`} onClick={() => setTab("paste")}>
           Paste code
+        </button>
+        <span className="spacer" />
+        <button className="btn tabs-sample" onClick={onSample} title="Drill a small shopping-cart file">
+          Try a sample
         </button>
       </div>
 

@@ -34,7 +34,7 @@ export function RevealDiff({ reveal }: { reveal: Reveal }) {
       <div className="diff">
         {rows.map(({ b, a }, i) => (
           <div key={i}>
-            <div className="diff-row before"><span className="tag">yours</span><span>{highlight(b, a)}</span></div>
+            <div className="diff-row before"><span className="tag">original</span><span>{highlight(b, a)}</span></div>
             <div className="diff-row after"><span className="tag">planted</span><span>{highlight(a, b)}</span></div>
           </div>
         ))}
@@ -61,8 +61,12 @@ export function ResultCard({ found, seconds, penalty, wrongGuesses, usedHint, er
     <section className={`card reveal result ${found ? "is-found" : "is-missed"}`}>
       <h2>{found ? `Got it, ${Math.round(seconds)}s.` : "Here's what would have shipped."}</h2>
       <div className="stats-grid">
-        <div className="stat"><b>{found ? formatTime(seconds) : "—"}</b><span>final time</span></div>
-        <div className="stat"><b>+{penalty}s</b><span>penalties</span></div>
+        {found && (
+          <>
+            <div className="stat"><b>{formatTime(seconds)}</b><span>final time</span></div>
+            <div className="stat"><b>+{penalty}s</b><span>penalties</span></div>
+          </>
+        )}
         <div className="stat"><b>{wrongGuesses}</b><span>wrong {wrongGuesses === 1 ? "guess" : "guesses"}</span></div>
         <div className="stat"><b>{usedHint ? "yes" : "no"}</b><span>hint</span></div>
       </div>

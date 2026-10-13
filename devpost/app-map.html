@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>antiBug App Map</title>
+<style>
+  :root { --bg:#fbfaf7; --card:#ffffff; --ink:#1d2329; --muted:#5d6872; --line:#e2ded6; --accent:#1f8a5b; --bug:#c2413b; --code:#f2efe8; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg:#0f1317; --card:#161b21; --ink:#e6e9ec; --muted:#98a3ad; --line:#2a323a; --accent:#4cc38a; --bug:#f0716a; --code:#1d242b; } }
+  :root[data-theme="dark"] { --bg:#0f1317; --card:#161b21; --ink:#e6e9ec; --muted:#98a3ad; --line:#2a323a; --accent:#4cc38a; --bug:#f0716a; --code:#1d242b; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+  main { max-width: 860px; margin: 0 auto; padding: 32px 16px 64px; }
+  h1 { font-size: 1.7rem; margin: 0 0 4px; } h1 b { color: var(--bug); }
+  h2 { font-size: 1.15rem; margin: 36px 0 10px; }
+  p, li { color: var(--ink); } .muted { color: var(--muted); font-size: .92rem; }
+  code { font: .88em ui-monospace, "SF Mono", Menlo, monospace; background: var(--code); padding: 1px 5px; border-radius: 4px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; margin: 12px 0; }
+  .stop { display: grid; grid-template-columns: 34px 1fr; gap: 12px; }
+  .num { width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: var(--bg); display: grid; place-items: center; font-weight: 700; }
+  .stop h3 { margin: 2px 0 6px; font-size: 1rem; }
+  svg { width: 100%; height: auto; display: block; }
+  svg text { fill: var(--ink); font: 13px system-ui, sans-serif; } svg .sub { fill: var(--muted); font-size: 11px; }
+  svg rect.box { fill: var(--card); stroke: var(--line); } svg rect.ext { fill: var(--code); stroke: var(--line); stroke-dasharray: 4 3; }
+  svg path { stroke: var(--accent); fill: none; stroke-width: 1.6; }
+  table { width: 100%; border-collapse: collapse; font-size: .93rem; }
+  td { border-top: 1px solid var(--line); padding: 8px 6px; vertical-align: top; } td:first-child { width: 42%; }
+  details summary { cursor: pointer; font-weight: 600; }
+  pre { background: var(--code); padding: 12px; border-radius: 8px; overflow-x: auto; font: .85rem ui-monospace, Menlo, monospace; }
+</style>
+</head>
+<body>
+<main>
+  <h1>anti<b>Bug</b> app map</h1>
+  <p class="muted">A snapshot of commit <code>42f3625</code> (2026-10-13). The code moves on; paths and names here can drift.</p>
+
+  <h2>What it is</h2>
+  <p>A debugging drill. You give antiBug a commit from a public GitHub repo, pasted code, or the built-in sample. Claude plants one realistic logic bug that still compiles, and you race the clock to click the broken line. Then you see the original line next to the planted one, with a short lesson.</p>
+  <p>The main pieces:</p>
+  <ul>
+    <li><strong>The page</strong> (<code>app/page.tsx</code>) runs the setup → planting → hunt → reveal phases in the browser.</li>
+    <li><strong>Five API routes</strong> (<code>app/api/*/route.ts</code>): commits, drill, guess, hint, reveal.</li>
+    <li><strong>The saboteur</strong> (<code>lib/saboteur.ts</code> + <code>lib/validate.ts</code>) asks Claude for a bug and checks it mechanically.</li>
+    <li><strong>The seal</strong> (<code>lib/seal.ts</code>) encrypts the answer into a token, so the browser carries the drill but can't read where the bug is. There is no database.</li>
+  </ul>
+
+  <h2>One action, end to end: “Try a sample”, then click a line</h2>
+  <div class="card">
+    <svg viewBox="0 0 800 250" role="img" aria-labelledby="dtitle">
+      <title id="dtitle">The browser posts to /api/drill, which plants a bug with Claude and returns a sealed token; a click posts the token to /api/guess, which opens it and answers hot, warm, cold or correct.</title>
+      <rect class="box" x="10" y="20" width="200" height="70" rx="8"/><text x="24" y="48">Browser: app/page.tsx</text><text class="sub" x="24" y="68">plant() · guess()</text>
+      <rect class="box" x="290" y="20" width="220" height="70" rx="8"/><text x="304" y="48">POST /api/drill</text><text class="sub" x="304" y="68">takeDrill → drillPasted → seal</text>
+      <rect class="ext" x="590" y="20" width="200" height="70" rx="8"/><text x="604" y="48">Claude (claude-opus-5-5)</text><text class="sub" x="604" y="68">plantBug ↔ checkMutation</text>
+      <rect class="box" x="290" y="160" width="220" height="70" rx="8"/><text x="304" y="188">POST /api/guess</text><text class="sub" x="304" y="208">open(token) → temperature()</text>
+      <rect class="box" x="10" y="160" width="200" height="70" rx="8"/><text x="24" y="188">Feedback on screen</text><text class="sub" x="24" y="208">“Not line N. Hot” or reveal</text>
+      <path d="M210 55 H290"/><path d="M510 55 H590"/><path d="M110 90 V160"/><path d="M210 195 H290"/>
+      <text class="sub" x="222" y="46">code</text><text class="sub" x="222" y="186">token + line</text><text class="sub" x="118" y="130">token</text>
+    </svg>
+  </div>
+
+  <p class="muted">Reference route: you can follow these stops in the editor; they were not toured live.</p>
+  <div class="card stop"><div class="num">1</div><div>
+    <h3>The click starts a drill: <code>app/page.tsx</code></h3>
+    <p>“Try a sample” calls <code>startPaste(SAMPLE.code, SAMPLE.filename)</code> (sample in <code>lib/sample.ts</code>). That calls <code>plant()</code>, which posts the code to <code>/api/drill</code> and keeps the returned <code>drill.token</code>. Search for <code>async function plant</code>.</p>
+  </div></div>
+  <div class="card stop"><div class="num">2</div><div>
+    <h3>The server plants and seals: <code>app/api/drill/route.ts</code> → <code>lib/drill.ts</code> → <code>lib/saboteur.ts</code></h3>
+    <p>The route first counts the visitor's drills (<code>takeDrill</code> in <code>lib/ratelimit.ts</code>; on Cloudflare a Durable Object in <code>lib/drill-limiter.ts</code>). <code>drillPasted</code> then calls <code>plantBug</code>. This loop asks Claude for a mutation, runs <code>checkMutation</code> (<code>lib/validate.ts</code>: same line count, still parses, changes runtime behaviour), and retries up to 3 times with the checker's reason. The answer is sealed with AES-GCM by <code>seal()</code>.</p>
+  </div></div>
+  <div class="card stop"><div class="num">3</div><div>
+    <h3>A click is judged: <code>guess</code> in <code>app/page.tsx</code> → <code>app/api/guess/route.ts</code></h3>
+    <p><code>guess(line)</code> posts the token and the line. The route calls <code>open(token)</code> and compares the line with <code>bugLines</code>. If they differ, it returns <code>temperature()</code> from <code>lib/shared.ts</code>: hot within 3 lines, warm within 10. The page adds the 10-second penalty itself (<code>WRONG_PENALTY</code>).</p>
+  </div></div>
+
+  <h2>To change this, start here</h2>
+  <table>
+    <tr><td>What Claude is asked to plant</td><td><code>buildPrompt</code> in <code>lib/saboteur.ts</code></td></tr>
+    <tr><td>What counts as a fair bug</td><td><code>checkMutation</code> and <code>CATEGORIES</code> in <code>lib/validate.ts</code></td></tr>
+    <tr><td>Penalties</td><td><code>WRONG_PENALTY</code>, <code>HINT_PENALTY</code> at the top of <code>app/page.tsx</code></td></tr>
+    <tr><td>Hot / warm distances</td><td><code>temperature</code> in <code>lib/shared.ts</code></td></tr>
+    <tr><td>Which file in a commit gets the bug</td><td><code>rankTargets</code> in <code>lib/target.ts</code></td></tr>
+    <tr><td>The sample file</td><td><code>lib/sample.ts</code> (copy of <code>tests/fixtures/cart.ts</code>)</td></tr>
+    <tr><td>Drills per hour</td><td><code>ANTIBUG_DRILLS_PER_HOUR</code> in <code>wrangler.jsonc</code> (live) or the environment (local)</td></tr>
+    <tr><td>Colours, fonts, layout</td><td><code>app/globals.css</code></td></tr>
+  </table>
+
+  <h2>A practice to reuse: never ship model output unchecked</h2>
+  <div class="card">
+    <p><strong>Decision.</strong> Claude's bug is never trusted as is. Each suggestion passes a deterministic checker before anyone sees it. When the checker rejects it, the reason goes back into the next prompt (<code>plantBug</code> loop, <code>lib/saboteur.ts</code>). It rejects edits that only touch types or comments (identical transpiled output) and edits that change the line count, which would break click-to-guess. What it can't judge, a person still has to: Ramy's final review found a drill that planted a skipped test in a test file, which led to the non-test-first ranking in <code>lib/target.ts</code> (checklist Revisions).</p>
+    <p><strong>Evidence.</strong> <code>tests/validate.test.ts</code> and <code>tests/saboteur.test.ts</code> run the checker and the retry loop with a mocked Claude. <code>npm run test:live</code> runs one real planting.</p>
+    <p><strong>Use it again.</strong> Whenever an LLM produces something your program acts on (a patch, a query, JSON, a plan), write down the rules a correct output must meet. Check them in code, feed the failure reason back, and cap the retries.</p>
+  </div>
+
+  <h2>Run it again</h2>
+<pre>npm install
+cp .env.example .env     # add ANTHROPIC_API_KEY (GITHUB_TOKEN optional)
+npm run dev              # http://localhost:3000
+npm test                 # unit tests, Claude mocked</pre>
+  <p class="muted">Live: https://antibug.ramy-comm.workers.dev · Deploy: <code>npm run deploy</code> (see README).</p>
+
+  <details><summary>Where the other pieces live</summary>
+    <ul>
+      <li>GitHub calls: <code>lib/github.ts</code> (<code>listCommits</code>, <code>getCommit</code>, <code>getFileAt</code>)</li>
+      <li>Streak, best time, recent drills: <code>lib/streak.ts</code>, <code>lib/history.ts</code> (browser storage only)</li>
+      <li>Error codes and messages: <code>lib/errors.ts</code></li>
+      <li>Headless checks: <code>scripts/verify-hunt.mjs</code>, <code>scripts/verify-commit-list.mjs</code>; demo recorder: <code>scripts/demo/record.mjs</code></li>
+    </ul>
+  </details>
+</main>
+</body>
+</html>

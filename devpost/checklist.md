@@ -60,15 +60,15 @@ Build mode: fast (Ramy asked to "proceed building auto"; pauses only at the hand
 
 ## Code Tour and App Map
 
-- [ ] Learning activity complete — guided route, focused alternative, prior practice connected, or brief recap
-- [ ] Optional edit and transfer reflection addressed — offered/declined/already covered/not applicable as appropriate
-- [ ] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
+- [x] Learning activity complete — brief recap (focused alternative offered; Ramy skipped the follow-up)
+- [x] Optional edit and transfer reflection addressed — offered, declined
+- [x] `devpost/app-map.html` generated from finished code, checked, and shown, including a project-grounded practice to reuse
 
-Activity and evidence: [what actually happened; real document/test/code references; unfinished work if interrupted]
-Route and stops: [actual paths and symbols; guided stops completed, or reference-only route]
-Edit outcome: [tried/kept/reverted/declined/not applicable; verification if changed]
-Reflection: [offered/answered/declined/already covered — personal answer belongs only in the ignored profile]
-Activity mode: [live app and editor, explicit static fallback, focused alternative, prior practice, or recap]
+Activity and evidence: brief evidence-based recap, not hands-on practice. Connection: Claude's output is gated by `checkMutation` (`lib/validate.ts`) with the reason fed back in the `plantBug` loop (`lib/saboteur.ts`; tests `tests/validate.test.ts`, `tests/saboteur.test.ts`), and the final review's skipped-test drill showed what the checker can't judge (`rankTargets`, `lib/target.ts`).
+Route and stops: reference-only route in the map — `app/page.tsx` `plant`/`guess` → `app/api/drill/route.ts` (`takeDrill`, `drillPasted`, `plantBug`, `seal`) → `app/api/guess/route.ts` (`open`, `temperature`). Not toured live.
+Edit outcome: not applicable (no edit offered for the recap).
+Reflection: offered, declined.
+Activity mode: recap. Map checked by headless screenshots (desktop and narrow) and opened in Ramy's browser; snapshot of commit `42f3625`.
 
 ## Revisions
 

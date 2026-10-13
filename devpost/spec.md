@@ -58,7 +58,8 @@ Paste mode replaces step 1, and the GitHub part of step 2, with `POST /api/drill
   - `ANTHROPIC_API_KEY`: required. Server-side only.
   - `ANTIBUG_SECRET`: a 32+ character secret for sealing answers. Optional locally (a random one is generated at start-up); **required** when deployed.
   - `GITHUB_TOKEN`: optional. Raises GitHub's limit from 60 to 5,000 requests per hour.
-- **Demo recording:** the local app, driven by the headless recording pipeline. The demo drills the antiBug repo's own commits, so the repo must be public by then. Paste mode works without it.
+- **Demo recording:** `scripts/demo/record.mjs` drives a local production build (`next build && next start -p 3002`) in headless Chrome through the core journey on the built-in sample; one real drill per take. It opens the sealed token with `.env`'s `ANTIBUG_SECRET` so it knows which line to click. Narration is Ramy's own script (`devpost/video/narration-en.json`), voiced with his Cartesia voice clone; the videos stay out of git (`scripts/demo/out/`).
+- **Demo video:** https://youtu.be/BZV3YR1HF_M (YouTube, unlisted, 1:17, AI-use disclosed for the cloned voice).
 - **Deployed:** https://antibug.ramy-comm.workers.dev on Cloudflare Workers (Ramy authorized it in `6-ship` prep). `npm run deploy` copies the repo without `.env` files (OpenNext would otherwise bake them into the bundle), builds with webpack, and deploys. Secrets live in Workers secrets: `ANTHROPIC_API_KEY`, `ANTIBUG_SECRET`, `GITHUB_TOKEN`. GitHub's token matters more here: Cloudflare's shared IPs would exhaust the 60-per-hour anonymous limit. It stays up through the judging period (to Oct 30), since the rules ask for free access for judges.
 - **Submission:** a demo video under 3 minutes plus a public GitHub repo with a license showing in the About section, and the live URL in the testing instructions.
 

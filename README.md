@@ -6,6 +6,8 @@ antiBug is a debugging drill on code you just shipped. Point it at a commit in a
 
 Built for developers who work with AI coding agents and merge code they only skimmed. Every new commit is a fresh 90-second review drill.
 
+**Demo video:** https://youtu.be/BZV3YR1HF_M · **Live:** https://antibug.ramy-comm.workers.dev
+
 ## How it works
 
 1. **Pick code.** A recent commit from a public repo, up to 300 pasted lines of JS/TS, or **Try a sample** for a one-click drill on a built-in file.

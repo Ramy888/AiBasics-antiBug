@@ -1,0 +1,75 @@
+{
+ "language": "en",
+ "segments": [
+  {
+   "start": 0,
+   "end": 13.4,
+   "on_screen": "Arrive: what antiBug is, two ways in, empty record",
+   "max_chars": 180,
+   "text": "I’m Ramy. I built antiBug for developers who use AI to write code and want to sharpen their debugging skills through short, timed challenges."
+  },
+  {
+   "start": 13.7,
+   "end": 19.4,
+   "on_screen": "Try a sample (one click, no code needed), then Claude plants one bug and checks it still compiles",
+   "max_chars": 76,
+   "text": "I click “Try a sample.” Claude plants a bug for me to find."
+  },
+  {
+   "start": 19.7,
+   "end": 26.8,
+   "on_screen": "Hunt: one line is broken, the clock is running",
+   "max_chars": 95,
+   "text": "Now the clock starts. I read the code and hunt for the faulty line."
+  },
+  {
+   "start": 27.1,
+   "end": 34,
+   "on_screen": "Wrong guess: +10 s and a temperature hint",
+   "max_chars": 93,
+   "text": "That guess is wrong, so ten seconds are added. “Hot” tells me I’m close."
+  },
+  {
+   "start": 34.3,
+   "end": 39.7,
+   "on_screen": "Hint: the bug's category for +15 s",
+   "max_chars": 72,
+   "text": "I take a hint. It helps, but adds another fifteen seconds."
+  },
+  {
+   "start": 40,
+   "end": 43.4,
+   "on_screen": "Found it: click the broken line",
+   "max_chars": 45,
+   "text": "Found it. I click the faulty line."
+  },
+  {
+   "start": 43.7,
+   "end": 52.9,
+   "on_screen": "Reveal: original and planted side by side, with the lesson",
+   "max_chars": 124,
+   "text": "I compare the original and changed code, then learn what went wrong and how to recognize that mistake."
+  },
+  {
+   "start": 53.2,
+   "end": 62.2,
+   "on_screen": "Result: clock plus penalties, streak and best time",
+   "max_chars": 121,
+   "text": "My final time includes the penalties. I can track my streak and compare this result with my best time."
+  },
+  {
+   "start": 62.5,
+   "end": 71,
+   "on_screen": "In the code: your click and the planted bug, labelled",
+   "max_chars": 114,
+   "text": "The “your click” and “planted bug” tags show exactly what I selected and where Claude placed the bug."
+  },
+  {
+   "start": 71.3,
+   "end": 76.7,
+   "on_screen": "Drill again plants a new bug; or bring your own commit",
+   "max_chars": 72,
+   "text": "Next, I can drill again or practice with my own commit."
+  }
+ ]
+}
